@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.contrib import messages  
 from .models import Website
 from .forms import RegisterForm
 from django.contrib.auth import authenticate, login
@@ -8,7 +9,6 @@ from django.contrib.auth.forms import AuthenticationForm
 
 def home(request):
     return render(request, 'base/home.html')
-
 
 def user_login(request):
     if request.method == 'POST':
@@ -24,7 +24,6 @@ def user_login(request):
         form = AuthenticationForm()
     
     return render(request, 'base/login.html', {'form': form})
-
 
 def register(request):
     if request.method == 'POST':
@@ -65,6 +64,8 @@ def edit_website(request, website_id):
         website.main_content = request.POST.get('main_content', website.main_content)
         website.footer_content = request.POST.get('footer_content', website.footer_content)
         website.save()
+        
+        messages.success(request, 'Изменения сохранены успешно!')
         return redirect('edit_website', website_id=website.id)
     
     return render(request, 'base/edit_website.html', {'website': website})

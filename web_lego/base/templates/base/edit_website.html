@@ -1,22 +1,461 @@
-<!--РЕДАКТИРОВАНИЕ САЙТА-->
-
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Редактировать - {{ website.title }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать {{ website.title }} - Web Lego</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .settings-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
+        }
+
+        .preview-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .color-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-input input[type="color"] {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .preview-frame {
+            flex: 1;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 1rem;
+            background: #f8fafc;
+            min-height: 400px;
+            overflow: auto;
+        }
+
+        .preview-title {
+            color: #374151;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: #7c3aed;
+            border-bottom-color: #7c3aed;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .html-hint {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .html-hint code {
+            background: #f3f4f6;
+            padding: 0.125rem 0.25rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
-    <h1>Редактировать: {{ website.title }}</h1>
-    <form method="post">
-        {% csrf_token %}
-        <input type="text" name="title" value="{{ website.title }}">
-        <input type="color" name="background_color" value="{{ website.background_color }}">
-        <input type="color" name="text_color" value="{{ website.text_color }}">
-        <textarea name="header_content">{{ website.header_content }}</textarea>
-        <textarea name="main_content">{{ website.main_content }}</textarea>
-        <textarea name="footer_content">{{ website.footer_content }}</textarea>
-        <button type="submit">Сохранить</button>
-    </form>
-    <a href="{% url 'dashboard' %}">Назад в кабинет</a>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="{% url 'dashboard' %}" class="logo">Web Lego</a>
+            <div class="nav-links">
+                <a href="{% url 'view_website' website.id %}" target="_blank" class="nav-link">👁️ Просмотреть</a>
+                <a href="{% url 'dashboard' %}" class="nav-link">← Назад в кабинет</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <h1 class="page-title">Редактировать: {{ website.title }}</h1>
+            
+            <!-- Добавьте этот блок для отображения сообщений -->
+            {% if messages %}
+                <div class="messages-container" style="max-width: 1200px; margin: 0 auto 2rem auto; padding: 0 2rem;">
+                    {% for message in messages %}
+                        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}" 
+                             style="background: #10b981; color: white; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form method="post" id="website-form">
+                {% csrf_token %}
+                
+                <div class="editor-layout">
+                    <!-- Левая панель - настройки -->
+                    <div class="settings-panel">
+                        <div class="tab-buttons">
+                            <button type="button" class="tab-button active" data-tab="basic">Основные</button>
+                            <button type="button" class="tab-button" data-tab="design">Дизайн</button>
+                            <button type="button" class="tab-button" data-tab="content">Контент</button>
+                        </div>
+
+                        <!-- Вкладка Основные -->
+                        <div class="tab-content active" id="basic-tab">
+                            <div class="form-group">
+                                <label for="title" class="form-label">Название сайта</label>
+                                <input type="text" id="title" name="title" class="form-input" 
+                                       value="{{ website.title }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Ссылка на сайт</label>
+                                <div class="form-input" style="background: #f8fafc;">
+                                    http://127.0.0.1:8000{% url 'view_website' website.id %}
+                                </div>
+                                <small style="color: #6b7280;">Скопируйте эту ссылку чтобы поделиться сайтом</small>
+                            </div>
+                        </div>
+
+                        <!-- Вкладка Дизайн -->
+                        <div class="tab-content" id="design-tab">
+                            <div class="form-group">
+                                <label class="form-label">Цвета</label>
+                                <div class="color-inputs">
+                                    <div class="color-input">
+                                        <input type="color" id="background_color" name="background_color" 
+                                               value="{{ website.background_color|default:'#ffffff' }}">
+                                        <label for="background_color">Фон</label>
+                                    </div>
+                                    <div class="color-input">
+                                        <input type="color" id="text_color" name="text_color" 
+                                               value="{{ website.text_color|default:'#000000' }}">
+                                        <label for="text_color">Текст</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Вкладка Контент -->
+                        <div class="tab-content" id="content-tab">
+                            <div class="form-group">
+                                <label for="header_content" class="form-label">Заголовок сайта (HTML)</label>
+                                <textarea id="header_content" name="header_content" class="form-input form-textarea"
+                                          placeholder="&lt;h1&gt;Заголовок вашего сайта&lt;/h1&gt;">{{ website.header_content|default:"&lt;h1&gt;Заголовок сайта&lt;/h1&gt;" }}</textarea>
+                                <div class="html-hint">
+                                    Можно использовать HTML: <code>&lt;h1&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;strong&gt;</code>, etc.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="main_content" class="form-label">Основной контент (HTML)</label>
+                                <textarea id="main_content" name="main_content" class="form-input form-textarea"
+                                          placeholder="&lt;p&gt;Основной текст вашего сайта&lt;/p&gt;">{{ website.main_content|default:"&lt;p&gt;Добро пожаловать на мой сайт!&lt;/p&gt;" }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="footer_content" class="form-label">Футер (HTML)</label>
+                                <textarea id="footer_content" name="footer_content" class="form-input form-textarea"
+                                          placeholder="&lt;p&gt;© 2024 Мой сайт&lt;/p&gt;">{{ website.footer_content|default:"&lt;p&gt;© 2024 Мой сайт&lt;/p&gt;" }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Правая панель - предпросмотр -->
+                    <div class="preview-panel">
+                        <h3 class="preview-title">Предпросмотр</h3>
+                        <div class="preview-frame" id="preview">
+                            <!-- Preview will be generated by JavaScript -->
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="{% url 'view_website' website.id %}" target="_blank" class="btn btn-success">
+                                👁️ Открыть в новой вкладке
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <div>
+                        <button type="submit" class="btn">
+                            💾 Сохранить изменения
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            Отмена
+                        </a>
+                    </div>
+                    <a href="{% url 'view_website' website.id %}" target="_blank" class="btn">
+                        🌐 Опубликовать
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // Live preview functionality
+        function updatePreview() {
+            const preview = document.getElementById('preview');
+            const bgColor = document.getElementById('background_color').value;
+            const textColor = document.getElementById('text_color').value;
+            const headerContent = document.getElementById('header_content').value;
+            const mainContent = document.getElementById('main_content').value;
+            const footerContent = document.getElementById('footer_content').value;
+
+            preview.innerHTML = `
+                <div style="
+                    background-color: ${bgColor};
+                    color: ${textColor};
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                    min-height: 100%;
+                    border-radius: 8px;
+                ">
+                    <header>${headerContent}</header>
+                    <main style="margin: 20px 0;">${mainContent}</main>
+                    <footer style="border-top: 1px solid ${textColor}22; padding-top: 20px; margin-top: 20px;">
+                        ${footerContent}
+                    </footer>
+                </div>
+            `;
+        }
+
+        // Update preview on input changes
+        document.querySelectorAll('#background_color, #text_color, #header_content, #main_content, #footer_content').forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Initial preview
+        updatePreview();
+
+        // Auto-save hint
+        let saved = false;
+        document.getElementById('website-form').addEventListener('submit', () => {
+            saved = true;
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (!saved) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
 </body>
 </html>

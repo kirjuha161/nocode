@@ -1,17 +1,230 @@
-<!--СОЗДАНИЕ САЙТА-->
-
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Создать сайт - Web Lego</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .create-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .tips {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #8b5cf6;
+            margin-top: 2rem;
+        }
+
+        .tips h3 {
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .tips ul {
+            color: #6b7280;
+            padding-left: 1.5rem;
+        }
+
+        .tips li {
+            margin-bottom: 0.25rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Создать новый сайт</h1>
-    <form method="post">
-        {% csrf_token %}
-        <input type="text" name="title" placeholder="Название сайта" required>
-        <button type="submit">Создать</button>
-    </form>
-    <a href="{% url 'dashboard' %}">Назад в кабинет</a>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="{% url 'dashboard' %}" class="logo">Web Lego</a>
+            <div class="nav-links">
+                <a href="{% url 'dashboard' %}" class="nav-link">← Назад в кабинет</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="create-card">
+                <h1 class="page-title">Создать новый сайт</h1>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="title" class="form-label">Название сайта *</label>
+                        <input type="text" id="title" name="title" class="form-input" 
+                               placeholder="Введите название вашего сайта" required
+                               value="{{ request.POST.title }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">Описание (необязательно)</label>
+                        <textarea id="description" name="description" class="form-input" 
+                                  placeholder="Краткое описание вашего сайта"
+                                  rows="3">{{ request.POST.description }}</textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn">
+                            🚀 Создать сайт
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            Отмена
+                        </a>
+                    </div>
+                </form>
+
+                <div class="tips">
+                    <h3>💡 Советы для начала:</h3>
+                    <ul>
+                        <li>Выберите понятное название для вашего сайта</li>
+                        <li>После создания вы сможете настроить дизайн и контент</li>
+                        <li>Используйте редактор для добавления текста, изображений и стилей</li>
+                        <li>Ваш сайт будет доступен по уникальной ссылке</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
 </body>
 </html>
