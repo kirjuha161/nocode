@@ -1,0 +1,29 @@
+/* Базовые переменные цветов */
+:root {
+    --primary-purple: #8b5cf6;
+    --primary-purple-dark: #7c3aed;
+    --primary-purple-darker: #5b21b6;
+    --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    --gradient-light: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    --text-dark: #1f2937;
+    --text-gray: #6b7280;
+    --white: #ffffff;
+}
+
+/* Общие стили для кнопок */
+.purple-btn {
+    background: var(--gradient-purple);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.purple-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}

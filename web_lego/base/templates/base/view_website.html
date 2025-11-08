@@ -1,0 +1,21 @@
+<!--ПРОСТОМОТР САЙТА-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ website.title }}</title>
+</head>
+<body>
+    <header>
+        {{ website.header_content|safe }}
+    </header>
+    <main>
+        {{ website.main_content|safe }}
+    </main>
+    <footer>
+        {{ website.footer_content|safe }}
+    </footer>
+    <a href="/dashboard/">Вернуться в кабинет</a>
+</body>
+</html>

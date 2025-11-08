@@ -1,0 +1,22 @@
+<!--РЕДАКТИРОВАНИЕ САЙТА-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Редактировать - {{ website.title }}</title>
+</head>
+<body>
+    <h1>Редактировать: {{ website.title }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="title" value="{{ website.title }}">
+        <input type="color" name="background_color" value="{{ website.background_color }}">
+        <input type="color" name="text_color" value="{{ website.text_color }}">
+        <textarea name="header_content">{{ website.header_content }}</textarea>
+        <textarea name="main_content">{{ website.main_content }}</textarea>
+        <textarea name="footer_content">{{ website.footer_content }}</textarea>
+        <button type="submit">Сохранить</button>
+    </form>
+    <a href="{% url 'dashboard' %}">Назад в кабинет</a>
+</body>
+</html>

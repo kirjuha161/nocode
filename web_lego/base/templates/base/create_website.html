@@ -1,0 +1,17 @@
+<!--СОЗДАНИЕ САЙТА-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Создать сайт - Web Lego</title>
+</head>
+<body>
+    <h1>Создать новый сайт</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Название сайта" required>
+        <button type="submit">Создать</button>
+    </form>
+    <a href="{% url 'dashboard' %}">Назад в кабинет</a>
+</body>
+</html>
