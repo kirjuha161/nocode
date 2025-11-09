@@ -107,7 +107,7 @@
 
         .websites-section {
             background: white;
-            padding: 2rem;
+            padding: 100px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
         }
@@ -115,11 +115,13 @@
         .section-title {
             font-size: 1.5rem;
             color: #1f2937;
-            margin-bottom: 1.5rem;
+            margin-bottom: 4.5rem;
             background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            margin-left: -70px; 
+    margin-top: -70px;
         }
 
         .websites-grid {
@@ -185,7 +187,7 @@
             color: white;
             padding: 2rem 0;
             text-align: center;
-            margin-top: 3rem;
+            margin-top: 219px;
         }
 
         .footer-content {
@@ -256,12 +258,6 @@
     <!-- Main Content -->
     <main class="dashboard">
         <div class="container">
-            <div class="welcome-section">
-                <h1>Личный кабинет</h1>
-                <p>Здесь вы можете управлять своими сайтами и создавать новые.</p>
-                <a href="{% url 'create_website' %}" class="btn">Создать новый сайт</a>
-            </div>
-
             <div class="websites-section">
                 <h2 class="section-title">Мои сайты</h2>
                 
@@ -279,6 +275,9 @@
                                 </div>
                             </div>
                         {% endfor %}
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <a href="{% url 'create_website' %}" class="btn">Создать сайт</a>
                     </div>
                 {% else %}
                     <div class="empty-state">
