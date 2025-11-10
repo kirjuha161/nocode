@@ -272,6 +272,10 @@
                                 <div class="website-actions">
                                     <a href="{% url 'edit_website' website.id %}" class="btn btn-small btn-edit">Редактировать</a>
                                     <a href="{% url 'view_website' website.id %}" target="_blank" class="btn btn-small btn-view">Просмотреть</a>
+                                    <form method="post" action="{% url 'delete_website' website.id %}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить этот сайт?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-small" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">Удалить</button>
+                                    </form>
                                 </div>
                             </div>
                         {% endfor %}

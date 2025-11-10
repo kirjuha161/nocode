@@ -73,3 +73,11 @@ def edit_website(request, website_id):
 def view_website(request, website_id):
     website = get_object_or_404(Website, id=website_id)
     return render(request, 'base/view_website.html', {'website': website})
+
+@login_required
+def delete_website(request, website_id):
+    website = get_object_or_404(Website, id=website_id)
+    if request.user == website.owner:
+        website.delete()
+        return redirect('dashboard')
+    return redirect('dashboard')
