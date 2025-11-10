@@ -191,7 +191,7 @@
                     {% csrf_token %}
                     
                     <div class="form-group">
-                        <label for="title" class="form-label">Название сайта *</label>
+                        <label for="title" class="form-label">Название сайта</label>
                         <input type="text" id="title" name="title" class="form-input" 
                                placeholder="Введите название вашего сайта" required
                                value="{{ request.POST.title }}">
