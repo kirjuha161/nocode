@@ -2,10 +2,15 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib import messages  
-from .models import Website
+from .models import Website, Block
 from .forms import RegisterForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.db import models
+import json
 
 def home(request):
     return render(request, 'base/home.html')
@@ -55,24 +60,46 @@ def create_website(request):
 @login_required
 def edit_website(request, website_id):
     website = get_object_or_404(Website, id=website_id, owner=request.user)
+    blocks = website.blocks.filter(is_active=True)
     
     if request.method == 'POST':
+        # Обновление основных настроек сайта
         website.title = request.POST.get('title', website.title)
         website.background_color = request.POST.get('background_color', website.background_color)
         website.text_color = request.POST.get('text_color', website.text_color)
-        website.header_content = request.POST.get('header_content', website.header_content)
-        website.main_content = request.POST.get('main_content', website.main_content)
+        website.font_family = request.POST.get('font_family', website.font_family)
+        
+        # Настройки Header
+        website.header_company_name = request.POST.get('header_company_name', website.header_company_name)
+        website.header_background_color = request.POST.get('header_background_color', website.header_background_color)
+        website.header_text_color = request.POST.get('header_text_color', website.header_text_color)
+        website.header_show = request.POST.get('header_show') == 'on'
+        if 'header_logo' in request.FILES:
+            website.header_logo = request.FILES['header_logo']
+        
+        # Настройки Footer
+        website.footer_background_color = request.POST.get('footer_background_color', website.footer_background_color)
+        website.footer_text_color = request.POST.get('footer_text_color', website.footer_text_color)
         website.footer_content = request.POST.get('footer_content', website.footer_content)
+        website.footer_show = request.POST.get('footer_show') == 'on'
+        
         website.save()
         
         messages.success(request, 'Изменения сохранены успешно!')
         return redirect('edit_website', website_id=website.id)
     
-    return render(request, 'base/edit_website.html', {'website': website})
+    return render(request, 'base/edit_website.html', {
+        'website': website,
+        'blocks': blocks
+    })
 
 def view_website(request, website_id):
     website = get_object_or_404(Website, id=website_id)
-    return render(request, 'base/view_website.html', {'website': website})
+    blocks = website.blocks.filter(is_active=True)
+    return render(request, 'base/view_website.html', {
+        'website': website,
+        'blocks': blocks
+    })
 
 @login_required
 def delete_website(request, website_id):
@@ -81,3 +108,112 @@ def delete_website(request, website_id):
         website.delete()
         return redirect('dashboard')
     return redirect('dashboard')
+
+
+# API endpoints для работы с блоками
+@login_required
+@require_http_methods(["POST"])
+def api_create_block(request, website_id):
+    """Создать новый блок"""
+    website = get_object_or_404(Website, id=website_id, owner=request.user)
+    
+    try:
+        data = json.loads(request.body)
+        block_type = data.get('block_type', 'text')
+        
+        # Получаем максимальный порядок
+        max_order = Block.objects.filter(website=website).aggregate(models.Max('order'))['order__max'] or 0
+        
+        block = Block.objects.create(
+            website=website,
+            block_type=block_type,
+            order=max_order + 1,
+            data=data.get('data', {})
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'block': {
+                'id': block.id,
+                'block_type': block.block_type,
+                'order': block.order,
+                'data': block.get_data()
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@require_http_methods(["PUT", "PATCH"])
+def api_update_block(request, block_id):
+    """Обновить блок"""
+    block = get_object_or_404(Block, id=block_id)
+    
+    if block.website.owner != request.user:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        
+        if 'data' in data:
+            block.data = data['data']
+        if 'order' in data:
+            block.order = data['order']
+        if 'is_active' in data:
+            block.is_active = data['is_active']
+        if 'background_color' in data:
+            block.background_color = data['background_color']
+        if 'text_color' in data:
+            block.text_color = data['text_color']
+        if 'padding' in data:
+            block.padding = data['padding']
+        if 'margin' in data:
+            block.margin = data['margin']
+        
+        block.save()
+        
+        return JsonResponse({
+            'success': True,
+            'block': {
+                'id': block.id,
+                'block_type': block.block_type,
+                'order': block.order,
+                'data': block.get_data()
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def api_delete_block(request, block_id):
+    """Удалить блок"""
+    block = get_object_or_404(Block, id=block_id)
+    
+    if block.website.owner != request.user:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    block.delete()
+    return JsonResponse({'success': True})
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_reorder_blocks(request, website_id):
+    """Изменение порядка блоков"""
+    website = get_object_or_404(Website, id=website_id, owner=request.user)
+    
+    try:
+        data = json.loads(request.body)
+        block_orders = data.get('blocks', [])  # [{'id': 1, 'order': 0}, ...]
+        
+        for item in block_orders:
+            block = Block.objects.get(id=item['id'], website=website)
+            block.order = item['order']
+            block.save()
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

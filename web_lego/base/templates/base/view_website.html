@@ -1,21 +1,160 @@
-<!--ПРОСТОМОТР САЙТА-->
-
-
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ website.title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: {{ website.font_family|default:"Arial, sans-serif" }};
+            background-color: {{ website.background_color|default:"#ffffff" }};
+            color: {{ website.text_color|default:"#000000" }};
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: {{ website.header_background_color|default:"#ffffff" }};
+            color: {{ website.header_text_color|default:"#000000" }};
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-logo {
+            max-height: 50px;
+            width: auto;
+        }
+
+        .header-company-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 200px);
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .block-item {
+            margin-bottom: 2rem;
+        }
+
+        .footer {
+            background-color: {{ website.footer_background_color|default:"#f3f4f6" }};
+            color: {{ website.footer_text_color|default:"#000000" }};
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Стили для слайдера */
+        .slider {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        {{ website.header_content|safe }}
+    {% load block_tags %}
+
+    {% if website.header_show %}
+    <header class="header">
+        <div class="header-content">
+            {% if website.header_logo %}
+                <img src="{{ website.header_logo.url }}" alt="Logo" class="header-logo">
+            {% endif %}
+            {% if website.header_company_name %}
+                <div class="header-company-name">{{ website.header_company_name }}</div>
+            {% endif %}
+        </div>
     </header>
-    <main>
-        {{ website.main_content|safe }}
+    {% endif %}
+
+    <main class="main-content">
+        {% for block in blocks %}
+            <div class="block-item">
+                {{ block|render_block }}
+            </div>
+        {% empty %}
+            <div style="text-align: center; padding: 3rem; color: #6b7280;">
+                <p>На сайте пока нет контента.</p>
+            </div>
+        {% endfor %}
     </main>
-    <footer>
-        {{ website.footer_content|safe }}
+
+    {% if website.footer_show %}
+    <footer class="footer">
+        <div class="footer-content">
+            {{ website.footer_content|safe }}
+        </div>
     </footer>
-    <a href="/dashboard/">Вернуться в кабинет</a>
+    {% endif %}
+
+    <script>
+        // Простой слайдер
+        document.querySelectorAll('.slider').forEach(slider => {
+            const slides = slider.querySelectorAll('.slide');
+            if (slides.length > 0) {
+                let currentSlide = 0;
+                slides[0].classList.add('active');
+                
+                setInterval(() => {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    slides[currentSlide].classList.add('active');
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>

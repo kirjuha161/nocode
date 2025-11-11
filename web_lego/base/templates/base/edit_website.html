@@ -1,3 +1,4 @@
+{% load block_tags %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -13,29 +14,26 @@
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            background: #f5f7fa;
             min-height: 100vh;
             color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            overflow-x: hidden;
         }
 
         .header {
             background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
             padding: 1rem 0;
             box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
-            margin-bottom: 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 0 2rem;
         }
@@ -66,42 +64,161 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        .editor-layout {
+        .editor-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        /* Панель блоков слева */
+        .blocks-panel {
+            width: 280px;
+            background: white;
+            border-right: 2px solid #e5e7eb;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .blocks-panel h3 {
+            color: #7c3aed;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .block-types {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
+            gap: 0.75rem;
         }
 
-        @media (max-width: 968px) {
-            .editor-layout {
-                grid-template-columns: 1fr;
-            }
+        .block-type-btn {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e5e7eb;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
         }
 
-        .settings-panel {
-            background: white;
+        .block-type-btn:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .block-type-btn:active {
+            cursor: grabbing;
+        }
+
+        /* Центральная область - редактор */
+        .editor-area {
+            flex: 1;
+            overflow-y: auto;
+            background: #f9fafb;
             padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
+            position: relative;
         }
 
-        .preview-panel {
+        .editor-canvas {
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
+            min-height: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
             padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
+        }
+
+        .block-item {
+            position: relative;
+            margin-bottom: 1rem;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: move;
+        }
+
+        .block-item:hover {
+            border-color: #8b5cf6;
+            background: #faf5ff;
+        }
+
+        .block-item.dragging {
+            opacity: 0.5;
+        }
+
+        .block-item.drag-over {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+
+        .block-item.selected {
+            border-color: #8b5cf6;
+            background: #faf5ff;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .block-content {
+            pointer-events: none;
+        }
+
+        .block-content .editable {
+            pointer-events: auto;
+        }
+
+        .block-controls {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            display: none;
+            gap: 0.5rem;
+        }
+
+        .block-item.selected .block-controls {
             display: flex;
-            flex-direction: column;
         }
 
-        .page-title {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 2rem;
+        .block-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .block-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .block-btn.delete {
+            background: #ef4444;
+        }
+
+        /* Панель настроек справа */
+        .settings-panel {
+            width: 320px;
+            background: white;
+            border-left: 2px solid #e5e7eb;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .settings-panel h3 {
+            color: #7c3aed;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
         }
 
         .form-group {
@@ -113,14 +230,15 @@
             margin-bottom: 0.5rem;
             color: #374151;
             font-weight: 600;
+            font-size: 0.875rem;
         }
 
         .form-input {
             width: 100%;
-            padding: 1rem;
+            padding: 0.75rem;
             border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
             transition: all 0.3s ease;
         }
 
@@ -128,18 +246,6 @@
             outline: none;
             border-color: #8b5cf6;
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-            font-family: monospace;
-        }
-
-        .color-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
         }
 
         .color-input {
@@ -150,7 +256,7 @@
 
         .color-input input[type="color"] {
             width: 50px;
-            height: 50px;
+            height: 40px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -160,16 +266,14 @@
             background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
             color: white;
             border: none;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            width: 100%;
+            margin-top: 1rem;
         }
 
         .btn:hover {
@@ -178,86 +282,125 @@
         }
 
         .btn-secondary {
-            background: transparent;
-            color: #6b7280;
-            border: 2px solid #e5e7eb;
-        }
-
-        .btn-secondary:hover {
-            background: #f9fafb;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: space-between;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .preview-frame {
-            flex: 1;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 1rem;
-            background: #f8fafc;
-            min-height: 400px;
-            overflow: auto;
-        }
-
-        .preview-title {
+            background: #e5e7eb;
             color: #374151;
-            margin-bottom: 1rem;
+        }
+
+        .empty-state {
             text-align: center;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .tab-button {
-            padding: 0.75rem 1.5rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
+            padding: 3rem;
             color: #6b7280;
-            border-bottom: 2px solid transparent;
+        }
+
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+
+        /* Inline редактирование */
+        .editable {
+            outline: none;
+            min-height: 1.5em;
+        }
+
+        .editable:focus {
+            background: #fef3c7;
+            border-radius: 4px;
+        }
+
+        /* Drop zone */
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            margin: 1rem 0;
             transition: all 0.3s ease;
         }
 
-        .tab-button.active {
+        .drop-zone.drag-over {
+            border-color: #8b5cf6;
+            background: #faf5ff;
             color: #7c3aed;
-            border-bottom-color: #7c3aed;
         }
 
-        .tab-content {
+        /* Предпросмотр */
+        .preview-mode {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .preview-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .preview-modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow: auto;
         }
 
-        .tab-content.active {
+        .preview-modal.active {
             display: block;
         }
 
-        .html-hint {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-top: 0.5rem;
+        .preview-content {
+            background: white;
+            max-width: 1200px;
+            margin: 2rem auto;
+            border-radius: 10px;
+            padding: 2rem;
+            position: relative;
         }
 
-        .html-hint code {
-            background: #f3f4f6;
-            padding: 0.125rem 0.25rem;
-            border-radius: 4px;
-            font-family: monospace;
+        .preview-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 1200px) {
+            .blocks-panel,
+            .settings-panel {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .editor-container {
+                flex-direction: column;
+            }
+            
+            .blocks-panel,
+            .settings-panel {
+                width: 100%;
+                max-height: 200px;
+            }
         }
     </style>
 </head>
@@ -267,194 +410,419 @@
         <nav class="nav">
             <a href="{% url 'dashboard' %}" class="logo">Web Lego</a>
             <div class="nav-links">
-                <a href="{% url 'view_website' website.id %}" target="_blank" class="nav-link">👁️ Просмотреть</a>
-                <a href="{% url 'dashboard' %}" class="nav-link">← Назад в кабинет</a>
+                <button class="nav-link" onclick="openPreview()">👁️ Предпросмотр</button>
+                <a href="{% url 'view_website' website.id %}" target="_blank" class="nav-link">🌐 Открыть сайт</a>
+                <a href="{% url 'dashboard' %}" class="nav-link">← Назад</a>
             </div>
         </nav>
     </header>
 
-    <!-- Main Content -->
-    <main>
-        <div class="container">
-            <h1 class="page-title">Редактировать: {{ website.title }}</h1>
-            
-            <!-- Добавьте этот блок для отображения сообщений -->
-            {% if messages %}
-                <div class="messages-container" style="max-width: 1200px; margin: 0 auto 2rem auto; padding: 0 2rem;">
-                    {% for message in messages %}
-                        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}" 
-                             style="background: #10b981; color: white; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem;">
-                            {{ message }}
+    <!-- Editor Container -->
+    <div class="editor-container">
+        <!-- Панель блоков -->
+        <div class="blocks-panel">
+            <h3>📦 Блоки</h3>
+            <div class="block-types">
+                <div class="block-type-btn" draggable="true" data-type="heading">
+                    📝 Заголовок
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="text">
+                    📄 Текст
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="image">
+                    🖼️ Изображение
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="video">
+                    🎥 Видео
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="button">
+                    🔘 Кнопка
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="slider">
+                    🎠 Слайдер
+                </div>
+            </div>
+        </div>
+
+        <!-- Область редактора -->
+        <div class="editor-area">
+            <div class="editor-canvas" id="editor-canvas">
+                {% if blocks %}
+                    {% for block in blocks %}
+                        <div class="block-item" data-block-id="{{ block.id }}" data-block-type="{{ block.block_type }}" draggable="true">
+                            <div class="block-controls">
+                                <button class="block-btn" onclick="editBlock({{ block.id }})">✏️</button>
+                                <button class="block-btn delete" onclick="deleteBlock({{ block.id }})">🗑️</button>
+                            </div>
+                            <div class="block-content">
+                                {{ block|render_block }}
+                            </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% endif %}
-            
-            <form method="post" id="website-form">
+                {% else %}
+                    <div class="empty-state">
+                        <p>Перетащите блоки сюда, чтобы начать создавать лендинг</p>
+                    </div>
+                {% endif %}
+                <div class="drop-zone" id="drop-zone">Перетащите блок сюда</div>
+            </div>
+        </div>
+
+        <!-- Панель настроек -->
+        <div class="settings-panel">
+            <h3>⚙️ Настройки</h3>
+            <form id="settings-form" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 
-                <div class="editor-layout">
-                    <!-- Левая панель - настройки -->
-                    <div class="settings-panel">
-                        <div class="tab-buttons">
-                            <button type="button" class="tab-button active" data-tab="basic">Основные</button>
-                            <button type="button" class="tab-button" data-tab="design">Дизайн</button>
-                            <button type="button" class="tab-button" data-tab="content">Контент</button>
-                        </div>
+                <div class="form-group">
+                    <label class="form-label">Название сайта</label>
+                    <input type="text" name="title" class="form-input" value="{{ website.title }}">
+                </div>
 
-                        <!-- Вкладка Основные -->
-                        <div class="tab-content active" id="basic-tab">
-                            <div class="form-group">
-                                <label for="title" class="form-label">Название сайта</label>
-                                <input type="text" id="title" name="title" class="form-input" 
-                                       value="{{ website.title }}" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Ссылка на сайт</label>
-                                <div class="form-input" style="background: #f8fafc;">
-                                    http://127.0.0.1:8000{% url 'view_website' website.id %}
-                                </div>
-                                <small style="color: #6b7280;">Скопируйте эту ссылку чтобы поделиться сайтом</small>
-                            </div>
-                        </div>
-
-                        <!-- Вкладка Дизайн -->
-                        <div class="tab-content" id="design-tab">
-                            <div class="form-group">
-                                <label class="form-label">Цвета</label>
-                                <div class="color-inputs">
-                                    <div class="color-input">
-                                        <input type="color" id="background_color" name="background_color" 
-                                               value="{{ website.background_color|default:'#ffffff' }}">
-                                        <label for="background_color">Фон</label>
-                                    </div>
-                                    <div class="color-input">
-                                        <input type="color" id="text_color" name="text_color" 
-                                               value="{{ website.text_color|default:'#000000' }}">
-                                        <label for="text_color">Текст</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Вкладка Контент -->
-                        <div class="tab-content" id="content-tab">
-                            <div class="form-group">
-                                <label for="header_content" class="form-label">Заголовок сайта (HTML)</label>
-                                <textarea id="header_content" name="header_content" class="form-input form-textarea"
-                                          placeholder="&lt;h1&gt;Заголовок вашего сайта&lt;/h1&gt;">{{ website.header_content|default:"&lt;h1&gt;Заголовок сайта&lt;/h1&gt;" }}</textarea>
-                                <div class="html-hint">
-                                    Можно использовать HTML: <code>&lt;h1&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;strong&gt;</code>, etc.
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="main_content" class="form-label">Основной контент (HTML)</label>
-                                <textarea id="main_content" name="main_content" class="form-input form-textarea"
-                                          placeholder="&lt;p&gt;Основной текст вашего сайта&lt;/p&gt;">{{ website.main_content|default:"&lt;p&gt;Добро пожаловать на мой сайт!&lt;/p&gt;" }}</textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="footer_content" class="form-label">Футер (HTML)</label>
-                                <textarea id="footer_content" name="footer_content" class="form-input form-textarea"
-                                          placeholder="&lt;p&gt;© 2024 Мой сайт&lt;/p&gt;">{{ website.footer_content|default:"&lt;p&gt;© 2024 Мой сайт&lt;/p&gt;" }}</textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Правая панель - предпросмотр -->
-                    <div class="preview-panel">
-                        <h3 class="preview-title">Предпросмотр</h3>
-                        <div class="preview-frame" id="preview">
-                            <!-- Preview will be generated by JavaScript -->
-                        </div>
-                        <div style="text-align: center; margin-top: 1rem;">
-                            <a href="{% url 'view_website' website.id %}" target="_blank" class="btn btn-success">
-                                👁️ Открыть в новой вкладке
-                            </a>
-                        </div>
+                <div class="form-group">
+                    <label class="form-label">Цвет фона</label>
+                    <div class="color-input">
+                        <input type="color" name="background_color" value="{{ website.background_color|default:'#ffffff' }}">
+                        <input type="text" class="form-input" value="{{ website.background_color|default:'#ffffff' }}" readonly>
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <div>
-                        <button type="submit" class="btn">
-                            💾 Сохранить изменения
-                        </button>
-                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
-                            Отмена
-                        </a>
+                <div class="form-group">
+                    <label class="form-label">Цвет текста</label>
+                    <div class="color-input">
+                        <input type="color" name="text_color" value="{{ website.text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.text_color|default:'#000000' }}" readonly>
                     </div>
-                    <a href="{% url 'view_website' website.id %}" target="_blank" class="btn">
-                        🌐 Опубликовать
-                    </a>
                 </div>
+
+                <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #7c3aed;">Header</h4>
+                
+                <div class="form-group">
+                    <label class="form-label">Название компании</label>
+                    <input type="text" name="header_company_name" class="form-input" value="{{ website.header_company_name }}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Логотип</label>
+                    <input type="file" name="header_logo" class="form-input" accept="image/*">
+                    {% if website.header_logo %}
+                        <img src="{{ website.header_logo.url }}" alt="Logo" style="max-width: 100px; margin-top: 0.5rem;">
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет фона Header</label>
+                    <div class="color-input">
+                        <input type="color" name="header_background_color" value="{{ website.header_background_color|default:'#ffffff' }}">
+                        <input type="text" class="form-input" value="{{ website.header_background_color|default:'#ffffff' }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет текста Header</label>
+                    <div class="color-input">
+                        <input type="color" name="header_text_color" value="{{ website.header_text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.header_text_color|default:'#000000' }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="header_show" {% if website.header_show %}checked{% endif %}>
+                        Показывать Header
+                    </label>
+                </div>
+
+                <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #7c3aed;">Footer</h4>
+
+                <div class="form-group">
+                    <label class="form-label">Содержимое Footer</label>
+                    <textarea name="footer_content" class="form-input" rows="3">{{ website.footer_content }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет фона Footer</label>
+                    <div class="color-input">
+                        <input type="color" name="footer_background_color" value="{{ website.footer_background_color|default:'#f3f4f6' }}">
+                        <input type="text" class="form-input" value="{{ website.footer_background_color|default:'#f3f4f6' }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет текста Footer</label>
+                    <div class="color-input">
+                        <input type="color" name="footer_text_color" value="{{ website.footer_text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.footer_text_color|default:'#000000' }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="footer_show" {% if website.footer_show %}checked{% endif %}>
+                        Показывать Footer
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">💾 Сохранить настройки</button>
             </form>
         </div>
-    </main>
+    </div>
+
+    <!-- Модальное окно предпросмотра -->
+    <div class="preview-modal" id="preview-modal">
+        <div class="preview-content">
+            <button class="preview-close" onclick="closePreview()">×</button>
+            <iframe src="{% url 'view_website' website.id %}" style="width: 100%; height: 80vh; border: none;"></iframe>
+        </div>
+    </div>
 
     <script>
-        // Tab functionality
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove active class from all tabs
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                
-                // Add active class to clicked tab
-                button.classList.add('active');
-                const tabId = button.getAttribute('data-tab');
-                document.getElementById(`${tabId}-tab`).classList.add('active');
+        const websiteId = {{ website.id }};
+        let selectedBlock = null;
+        let draggedBlock = null;
+        let draggedElement = null;
+        let dragOverElement = null;
+
+        // Drag & Drop для новых блоков из панели
+        document.querySelectorAll('.block-type-btn').forEach(btn => {
+            btn.addEventListener('dragstart', (e) => {
+                draggedBlock = e.target.dataset.type;
+                e.dataTransfer.effectAllowed = 'copy';
             });
         });
 
-        // Live preview functionality
-        function updatePreview() {
-            const preview = document.getElementById('preview');
-            const bgColor = document.getElementById('background_color').value;
-            const textColor = document.getElementById('text_color').value;
-            const headerContent = document.getElementById('header_content').value;
-            const mainContent = document.getElementById('main_content').value;
-            const footerContent = document.getElementById('footer_content').value;
+        const editorCanvas = document.getElementById('editor-canvas');
+        const dropZone = document.getElementById('drop-zone');
 
-            preview.innerHTML = `
-                <div style="
-                    background-color: ${bgColor};
-                    color: ${textColor};
-                    font-family: Arial, sans-serif;
-                    padding: 20px;
-                    min-height: 100%;
-                    border-radius: 8px;
-                ">
-                    <header>${headerContent}</header>
-                    <main style="margin: 20px 0;">${mainContent}</main>
-                    <footer style="border-top: 1px solid ${textColor}22; padding-top: 20px; margin-top: 20px;">
-                        ${footerContent}
-                    </footer>
-                </div>
-            `;
+        // Обработка перетаскивания существующих блоков
+        document.querySelectorAll('.block-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                draggedElement = item;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', item.outerHTML);
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                document.querySelectorAll('.block-item').forEach(b => b.classList.remove('drag-over'));
+            });
+
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (item !== draggedElement) {
+                    item.classList.add('drag-over');
+                }
+            });
+
+            item.addEventListener('dragleave', () => {
+                item.classList.remove('drag-over');
+            });
+
+            item.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+                
+                if (draggedElement && draggedElement !== item) {
+                    // Перемещение существующего блока
+                    const allBlocks = Array.from(document.querySelectorAll('.block-item'));
+                    const draggedIndex = allBlocks.indexOf(draggedElement);
+                    const targetIndex = allBlocks.indexOf(item);
+                    
+                    if (draggedIndex < targetIndex) {
+                        item.parentNode.insertBefore(draggedElement, item.nextSibling);
+                    } else {
+                        item.parentNode.insertBefore(draggedElement, item);
+                    }
+                    
+                    await reorderBlocks();
+                }
+            });
+        });
+
+        editorCanvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (draggedBlock) {
+                e.dataTransfer.dropEffect = 'copy';
+            } else {
+                e.dataTransfer.dropEffect = 'move';
+            }
+        });
+
+        editorCanvas.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            if (draggedBlock) {
+                await createBlock(draggedBlock);
+                draggedBlock = null;
+            }
+        });
+
+        // Создание блока
+        async function createBlock(blockType) {
+            try {
+                const response = await fetch(`/api/websites/${websiteId}/blocks/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        block_type: blockType,
+                        data: {}
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Ошибка создания блока:', error);
+                alert('Ошибка создания блока: ' + error.message);
+            }
         }
 
-        // Update preview on input changes
-        document.querySelectorAll('#background_color, #text_color, #header_content, #main_content, #footer_content').forEach(input => {
-            input.addEventListener('input', updatePreview);
-        });
+        // Переупорядочивание блоков
+        async function reorderBlocks() {
+            const blocks = Array.from(document.querySelectorAll('.block-item'));
+            const blockOrders = blocks.map((block, index) => ({
+                id: parseInt(block.dataset.blockId),
+                order: index
+            }));
 
-        // Initial preview
-        updatePreview();
+            try {
+                const response = await fetch(`/api/websites/${websiteId}/blocks/reorder/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ blocks: blockOrders })
+                });
 
-        // Auto-save hint
-        let saved = false;
-        document.getElementById('website-form').addEventListener('submit', () => {
-            saved = true;
-        });
-
-        window.addEventListener('beforeunload', (e) => {
-            if (!saved) {
-                e.preventDefault();
-                e.returnValue = '';
+                const result = await response.json();
+                if (!result.success) {
+                    console.error('Ошибка переупорядочивания:', result.error);
+                }
+            } catch (error) {
+                console.error('Ошибка переупорядочивания:', error);
             }
+        }
+
+        // Удаление блока
+        async function deleteBlock(blockId) {
+            if (!confirm('Удалить этот блок?')) return;
+
+            try {
+                const response = await fetch(`/api/blocks/${blockId}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+                    if (blockElement) {
+                        blockElement.remove();
+                    }
+                } else {
+                    alert('Ошибка удаления блока');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления блока:', error);
+                alert('Ошибка удаления блока: ' + error.message);
+            }
+        }
+
+        // Редактирование блока
+        function editBlock(blockId) {
+            const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+            blockElement.classList.add('selected');
+            selectedBlock = blockId;
+            
+            // Открываем модальное окно для редактирования
+            const blockType = blockElement.dataset.blockType;
+            openEditModal(blockId, blockType);
+        }
+
+        // Модальное окно для редактирования блока
+        function openEditModal(blockId, blockType) {
+            // Здесь можно создать модальное окно для редактирования
+            // Пока используем простой prompt для текстовых блоков
+            if (blockType === 'text' || blockType === 'heading') {
+                const newContent = prompt('Введите новый текст:');
+                if (newContent !== null) {
+                    updateBlockData(blockId, { content: newContent });
+                }
+            } else {
+                alert('Редактирование этого типа блока будет доступно в следующей версии');
+            }
+        }
+
+        // Обновление данных блока
+        async function updateBlockData(blockId, newData) {
+            try {
+                // Получаем текущие данные блока
+                const response = await fetch(`/api/blocks/${blockId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        data: newData
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Ошибка обновления блока: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Ошибка обновления блока:', error);
+                alert('Ошибка обновления блока: ' + error.message);
+            }
+        }
+
+        // Предпросмотр
+        function openPreview() {
+            document.getElementById('preview-modal').classList.add('active');
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').classList.remove('active');
+        }
+
+        // Вспомогательная функция для получения CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Выбор блока
+        document.querySelectorAll('.block-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.block-controls')) return;
+                
+                document.querySelectorAll('.block-item').forEach(b => b.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedBlock = item.dataset.blockId;
+            });
         });
     </script>
 </body>
