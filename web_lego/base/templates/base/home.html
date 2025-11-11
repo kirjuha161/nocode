@@ -69,6 +69,9 @@
 
         .btn {
             background: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
             color: #7c3aed;
             padding: 0.75rem 1.5rem;
             border-radius: 25px;
@@ -320,8 +323,15 @@
                 <a href="/" class="logo">Web Lego</a>
                 <div class="nav-links">
                     <a href="#features" class="nav-link">Возможности</a>
-                    <a href="/register/" class="btn">Регистрация</a>
-                    <a href="{% url 'login' %}" class="btn">Войти</a>
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Выйти</button>
+                        </form>
+                    {% else %}
+                        <a href="/register/" class="btn">Регистрация</a>
+                        <a href="{% url 'login' %}" class="btn">Войти</a>
+                    {% endif %}
                 </div>
             </nav>
         </div>
@@ -338,17 +348,6 @@
                 <a href="#features" class="btn-secondary">Узнать больше</a>
             </div>
 
-            {% if user.is_authenticated %}
-            <div class="auth-section">
-                <div class="user-info">
-                    <span>Вы вошли как <strong>{{ user.username }}</strong></span>
-                    <form method="post" action="{% url 'logout' %}" class="logout-form">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn">Выйти</button>
-                    </form>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </section>
 

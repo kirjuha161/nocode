@@ -68,6 +68,10 @@ def render_block(block):
         link = data.get('link', '#')
         style = data.get('style', 'primary')
         align = data.get('align', 'left')
+        bg_color = data.get('bg_color', '')
+        text_color = data.get('text_color', '')
+        size = data.get('size', 'medium')
+        border_radius = data.get('border_radius', '8px')
         
         # Стили кнопки
         button_styles = {
@@ -76,9 +80,26 @@ def render_block(block):
             'success': 'background: #10b981; color: white;',
             'danger': 'background: #ef4444; color: white;',
         }
-        btn_style = button_styles.get(style, button_styles['primary'])
         
-        return mark_safe(f'<div style="text-align: {align}; {style_attr}"><a href="{link}" style="{btn_style} padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: 600;">{text}</a></div>')
+        # Если задан кастомный цвет, используем его
+        if bg_color:
+            btn_style = f'background: {bg_color};'
+            if text_color:
+                btn_style += f' color: {text_color};'
+            else:
+                btn_style += ' color: white;'
+        else:
+            btn_style = button_styles.get(style, button_styles['primary'])
+        
+        # Размеры кнопки
+        size_styles = {
+            'small': 'padding: 0.5rem 1rem; font-size: 0.875rem;',
+            'medium': 'padding: 0.75rem 1.5rem; font-size: 1rem;',
+            'large': 'padding: 1rem 2rem; font-size: 1.125rem;',
+        }
+        size_style = size_styles.get(size, size_styles['medium'])
+        
+        return mark_safe(f'<div style="text-align: {align}; {style_attr}"><a href="{link}" style="{btn_style} {size_style} border-radius: {border_radius}; text-decoration: none; display: inline-block; font-weight: 600; transition: all 0.3s ease;">{text}</a></div>')
     
     elif block_type == 'slider':
         images = data.get('images', [])

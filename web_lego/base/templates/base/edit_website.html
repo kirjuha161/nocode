@@ -431,14 +431,20 @@
         }
 
         .preview-btn {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .preview-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
         .preview-modal {
@@ -755,6 +761,121 @@
             transform: scale(1.1);
         }
 
+        /* Стили для слайдера в редакторе */
+        .block-content .slider-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .block-content .slider {
+            position: relative;
+            overflow: visible;
+            display: inline-block;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .block-content .slide {
+            display: none;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .block-content .slide.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .block-content .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .block-content .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(139, 92, 246, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .block-content .slider-btn:hover {
+            background: rgba(124, 58, 237, 1);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .block-content .slider-prev {
+            left: 10px;
+        }
+
+        .block-content .slider-next {
+            right: 10px;
+        }
+
+        .block-content .slider-indicators {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+            padding: 3px 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .block-content .slider-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(139, 92, 246, 0.6);
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+
+        .block-content .slider-indicator:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.3);
+            border-color: rgba(139, 92, 246, 0.8);
+        }
+
+        .block-content .slider-indicator.active {
+            background: rgba(139, 92, 246, 1);
+            transform: scale(1.4);
+            border-color: rgba(139, 92, 246, 1);
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+        }
+
         @media (max-width: 1200px) {
             .blocks-panel,
             .settings-panel {
@@ -781,7 +902,7 @@
         <nav class="nav">
             <a href="{% url 'dashboard' %}" class="logo">Web Lego</a>
             <div class="nav-links">
-                <button class="nav-link" onclick="openPreview()">👁️ Предпросмотр</button>
+                <button class="nav-link preview-btn" onclick="openPreview()">👁️ Предпросмотр</button>
                 <a href="{% url 'view_website' website.id %}" target="_blank" class="nav-link">🌐 Открыть сайт</a>
                 <a href="{% url 'dashboard' %}" class="nav-link">← Назад</a>
             </div>
@@ -822,8 +943,8 @@
                     {% for block in blocks %}
                         <div class="block-item" data-block-id="{{ block.id }}" data-block-type="{{ block.block_type }}" draggable="true">
                             <div class="block-controls">
-                                <button class="block-btn" onclick="editBlock({{ block.id }})">✏️</button>
-                                <button class="block-btn delete" onclick="deleteBlock({{ block.id }})">🗑️</button>
+                                <button type="button" class="block-btn" onclick="editBlock('{{ block.id }}')">✏️</button>
+                                <button type="button" class="block-btn delete" onclick="deleteBlock('{{ block.id }}')">🗑️</button>
                             </div>
                             {% if block.block_type == 'image' or block.block_type == 'slider' %}
                             <div class="block-resize-handle se" data-handle="se"></div>
@@ -966,9 +1087,8 @@
             </div>
         </div>
     </div>
-
     <script>
-        const websiteId = {{ website.id }};
+        const websiteId = {% if website.id %}{{ website.id }}{% else %}null{% endif %};
         let selectedBlock = null;
         let draggedBlock = null;
         let draggedElement = null;
@@ -1144,11 +1264,108 @@
             const modal = document.getElementById('edit-modal');
             const modalBody = document.getElementById('edit-modal-body');
             
-            if (blockType === 'text' || blockType === 'heading') {
-                const newContent = prompt('Введите новый текст:');
-                if (newContent !== null) {
-                    updateBlockData(blockId, { content: newContent });
-                }
+            if (blockType === 'text') {
+                // Получаем информацию о блоке текста
+                fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const textData = data.block?.data || {};
+                    const content = textData.content || 'Текст блока';
+                    const size = textData.size || '16px';
+                    const align = textData.align || 'left';
+                    
+                    modalBody.innerHTML = `
+                        <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">📄 Редактировать текст</h3>
+                        <form id="text-edit-form">
+                            <div class="form-group">
+                                <label class="form-label">Текст</label>
+                                <textarea id="text-content-input" class="form-input" rows="4" placeholder="Введите текст">${content}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Размер шрифта</label>
+                                <input type="text" id="text-size-input" class="form-input" placeholder="16px" value="${size}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Выравнивание</label>
+                                <select id="text-align-input" class="form-input">
+                                    <option value="left" ${align === 'left' ? 'selected' : ''}>Слева</option>
+                                    <option value="center" ${align === 'center' ? 'selected' : ''}>По центру</option>
+                                    <option value="right" ${align === 'right' ? 'selected' : ''}>Справа</option>
+                                    <option value="justify" ${align === 'justify' ? 'selected' : ''}>По ширине</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="button" class="btn" onclick="saveTextBlock(${blockId})">💾 Сохранить</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
+                            </div>
+                        </form>
+                    `;
+                    
+                    modal.classList.add('active');
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки данных блока:', error);
+                    alert('Ошибка загрузки данных блока');
+                });
+            } else if (blockType === 'heading') {
+                // Получаем информацию о блоке заголовка
+                fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const headingData = data.block?.data || {};
+                    const content = headingData.content || 'Заголовок';
+                    const level = headingData.level || 'h1';
+                    const align = headingData.align || 'left';
+                    
+                    modalBody.innerHTML = `
+                        <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">📝 Редактировать заголовок</h3>
+                        <form id="heading-edit-form">
+                            <div class="form-group">
+                                <label class="form-label">Текст заголовка</label>
+                                <input type="text" id="heading-content-input" class="form-input" placeholder="Заголовок" value="${content}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Уровень заголовка</label>
+                                <select id="heading-level-input" class="form-input">
+                                    <option value="h1" ${level === 'h1' ? 'selected' : ''}>H1 - Самый большой</option>
+                                    <option value="h2" ${level === 'h2' ? 'selected' : ''}>H2</option>
+                                    <option value="h3" ${level === 'h3' ? 'selected' : ''}>H3</option>
+                                    <option value="h4" ${level === 'h4' ? 'selected' : ''}>H4</option>
+                                    <option value="h5" ${level === 'h5' ? 'selected' : ''}>H5</option>
+                                    <option value="h6" ${level === 'h6' ? 'selected' : ''}>H6 - Самый маленький</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Выравнивание</label>
+                                <select id="heading-align-input" class="form-input">
+                                    <option value="left" ${align === 'left' ? 'selected' : ''}>Слева</option>
+                                    <option value="center" ${align === 'center' ? 'selected' : ''}>По центру</option>
+                                    <option value="right" ${align === 'right' ? 'selected' : ''}>Справа</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="button" class="btn" onclick="saveHeadingBlock(${blockId})">💾 Сохранить</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
+                            </div>
+                        </form>
+                    `;
+                    
+                    modal.classList.add('active');
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки данных блока:', error);
+                    alert('Ошибка загрузки данных блока');
+                });
             } else if (blockType === 'image') {
                 // Получаем информацию о блоке
                 fetch(`/api/blocks/${blockId}/`, {
@@ -1176,17 +1393,17 @@
                                 </p>
                                 <div id="image-preview-wrapper" style="display: ${currentImageUrl ? 'block' : 'none'}; text-align: center;">
                                     ${currentImageUrl ? `
-                                    <div class="image-preview-container" id="current-image-container">
-                                        <img src="${currentImageUrl}" alt="Текущее изображение" class="image-preview" id="current-image-preview">
-                                        <div class="resize-handle se" data-handle="se"></div>
-                                        <div class="resize-handle sw" data-handle="sw"></div>
-                                        <div class="resize-handle ne" data-handle="ne"></div>
-                                        <div class="resize-handle nw" data-handle="nw"></div>
-                                        <div class="resize-handle e" data-handle="e"></div>
-                                        <div class="resize-handle w" data-handle="w"></div>
-                                        <div class="resize-handle n" data-handle="n"></div>
-                                        <div class="resize-handle s" data-handle="s"></div>
-                                    </div>
+                                        <div class="image-preview-container" id="current-image-container">
+                                            <img src="${currentImageUrl}" alt="Текущее изображение" class="image-preview" id="current-image-preview">
+                                            <div class="resize-handle se" data-handle="se"></div>
+                                            <div class="resize-handle sw" data-handle="sw"></div>
+                                            <div class="resize-handle ne" data-handle="ne"></div>
+                                            <div class="resize-handle nw" data-handle="nw"></div>
+                                            <div class="resize-handle e" data-handle="e"></div>
+                                            <div class="resize-handle w" data-handle="w"></div>
+                                            <div class="resize-handle n" data-handle="n"></div>
+                                            <div class="resize-handle s" data-handle="s"></div>
+                                        </div>
                                     ` : ''}
                                     <div class="image-preview-container" id="image-preview-container" style="display: none;">
                                         <img id="image-preview" class="image-preview">
@@ -1524,6 +1741,172 @@
                     console.error('Ошибка загрузки данных блока:', error);
                     alert('Ошибка загрузки данных блока');
                 });
+            } else if (blockType === 'button') {
+                // Получаем информацию о блоке кнопки
+                fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const buttonData = data.block?.data || {};
+                    const text = buttonData.text || 'Кнопка';
+                    const link = buttonData.link || '#';
+                    const style = buttonData.style || 'primary';
+                    const align = buttonData.align || 'left';
+                    const bgColor = buttonData.bg_color || '';
+                    const textColor = buttonData.text_color || '';
+                    const size = buttonData.size || 'medium';
+                    const borderRadius = buttonData.border_radius || '8px';
+                    
+                    modalBody.innerHTML = `
+                        <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">🔘 Редактировать кнопку</h3>
+                        <form id="button-edit-form">
+                            <div class="form-group">
+                                <label class="form-label">Текст кнопки</label>
+                                <input type="text" id="button-text-input" class="form-input" placeholder="Текст кнопки" value="${text}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ссылка</label>
+                                <input type="text" id="button-link-input" class="form-input" placeholder="https://example.com или #" value="${link}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Выравнивание</label>
+                                <select id="button-align-input" class="form-input">
+                                    <option value="left" ${align === 'left' ? 'selected' : ''}>Слева</option>
+                                    <option value="center" ${align === 'center' ? 'selected' : ''}>По центру</option>
+                                    <option value="right" ${align === 'right' ? 'selected' : ''}>Справа</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Размер</label>
+                                <select id="button-size-input" class="form-input">
+                                    <option value="small" ${size === 'small' ? 'selected' : ''}>Маленький</option>
+                                    <option value="medium" ${size === 'medium' ? 'selected' : ''}>Средний</option>
+                                    <option value="large" ${size === 'large' ? 'selected' : ''}>Большой</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Стиль (если не используется кастомный цвет)</label>
+                                <select id="button-style-input" class="form-input">
+                                    <option value="primary" ${style === 'primary' ? 'selected' : ''}>Основной (фиолетовый)</option>
+                                    <option value="secondary" ${style === 'secondary' ? 'selected' : ''}>Вторичный (серый)</option>
+                                    <option value="success" ${style === 'success' ? 'selected' : ''}>Успех (зеленый)</option>
+                                    <option value="danger" ${style === 'danger' ? 'selected' : ''}>Опасность (красный)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Цвет фона (кастомный)</label>
+                                <div class="color-input">
+                                    <input type="color" id="button-bg-color-input" value="${bgColor || '#8b5cf6'}">
+                                    <input type="text" id="button-bg-color-text" class="form-input" placeholder="#8b5cf6" value="${bgColor}">
+                                </div>
+                                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">Оставьте пустым для использования стиля выше</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Цвет текста</label>
+                                <div class="color-input">
+                                    <input type="color" id="button-text-color-input" value="${textColor || '#ffffff'}">
+                                    <input type="text" id="button-text-color-text" class="form-input" placeholder="#ffffff" value="${textColor}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Скругление углов</label>
+                                <input type="text" id="button-border-radius-input" class="form-input" placeholder="8px" value="${borderRadius}">
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="button" class="btn" onclick="saveButtonBlock(${blockId})">💾 Сохранить</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
+                            </div>
+                        </form>
+                    `;
+                    
+                    // Синхронизация color picker с текстовым полем
+                    const bgColorInput = document.getElementById('button-bg-color-input');
+                    const bgColorText = document.getElementById('button-bg-color-text');
+                    const textColorInput = document.getElementById('button-text-color-input');
+                    const textColorText = document.getElementById('button-text-color-text');
+                    
+                    if (bgColorInput && bgColorText) {
+                        bgColorInput.addEventListener('input', (e) => {
+                            bgColorText.value = e.target.value;
+                        });
+                        bgColorText.addEventListener('input', (e) => {
+                            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                                bgColorInput.value = e.target.value;
+                            }
+                        });
+                    }
+                    
+                    if (textColorInput && textColorText) {
+                        textColorInput.addEventListener('input', (e) => {
+                            textColorText.value = e.target.value;
+                        });
+                        textColorText.addEventListener('input', (e) => {
+                            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                                textColorInput.value = e.target.value;
+                            }
+                        });
+                    }
+                    
+                    modal.classList.add('active');
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки данных блока:', error);
+                    alert('Ошибка загрузки данных блока');
+                });
+            } else if (blockType === 'video') {
+                // Получаем информацию о блоке видео
+                fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const videoData = data.block?.data || {};
+                    const url = videoData.url || '';
+                    const width = videoData.width || '100%';
+                    const height = videoData.height || '400px';
+                    const autoplay = videoData.autoplay || false;
+                    
+                    modalBody.innerHTML = `
+                        <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">🎥 Редактировать видео</h3>
+                        <form id="video-edit-form">
+                            <div class="form-group">
+                                <label class="form-label">URL видео</label>
+                                <input type="text" id="video-url-input" class="form-input" placeholder="https://example.com/video.mp4" value="${url}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ширина</label>
+                                <input type="text" id="video-width-input" class="form-input" placeholder="100%" value="${width}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Высота</label>
+                                <input type="text" id="video-height-input" class="form-input" placeholder="400px" value="${height}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <input type="checkbox" id="video-autoplay-input" ${autoplay ? 'checked' : ''}>
+                                    Автовоспроизведение
+                                </label>
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="button" class="btn" onclick="saveVideoBlock(${blockId})">💾 Сохранить</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
+                            </div>
+                        </form>
+                    `;
+                    
+                    modal.classList.add('active');
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки данных блока:', error);
+                    alert('Ошибка загрузки данных блока');
+                });
             } else {
                 alert('Редактирование этого типа блока будет доступно в следующей версии');
             }
@@ -1533,11 +1916,13 @@
         let sliderImages = [];
         
         function addSliderImageToList(imageUrl) {
+            if (!sliderImages) sliderImages = [];
             sliderImages.push(imageUrl);
             updateSliderImagesList();
         }
         
         function removeSliderImage(index) {
+            if (!sliderImages) return;
             sliderImages.splice(index, 1);
             updateSliderImagesList();
         }
@@ -1546,7 +1931,7 @@
             const list = document.getElementById('slider-images-list');
             if (!list) return;
             
-            if (sliderImages.length === 0) {
+            if (!sliderImages || sliderImages.length === 0) {
                 list.innerHTML = '<p style="color: #6b7280; text-align: center; grid-column: 1/-1;">Нет изображений</p>';
                 return;
             }
@@ -1570,8 +1955,18 @@
         }
         
         async function saveSliderBlock(blockId) {
-            const autoplay = document.getElementById('slider-autoplay').checked;
-            const interval = parseInt(document.getElementById('slider-interval').value) || 3000;
+            const autoplayEl = document.getElementById('slider-autoplay');
+            const intervalEl = document.getElementById('slider-interval');
+            
+            if (!autoplayEl || !intervalEl) {
+                alert('Ошибка: элементы формы не найдены');
+                return;
+            }
+            
+            const autoplay = autoplayEl.checked;
+            const interval = parseInt(intervalEl.value) || 3000;
+            
+            if (!sliderImages) sliderImages = [];
             
             await updateBlockData(blockId, {
                 images: sliderImages,
@@ -1728,6 +2123,88 @@
             }
         }
 
+        // Сохранение блока кнопки
+        async function saveButtonBlock(blockId) {
+            const textInput = document.getElementById('button-text-input');
+            const linkInput = document.getElementById('button-link-input');
+            const alignInput = document.getElementById('button-align-input');
+            const sizeInput = document.getElementById('button-size-input');
+            const styleInput = document.getElementById('button-style-input');
+            const bgColorText = document.getElementById('button-bg-color-text');
+            const textColorText = document.getElementById('button-text-color-text');
+            const borderRadiusInput = document.getElementById('button-border-radius-input');
+            
+            const buttonData = {
+                text: textInput.value || 'Кнопка',
+                link: linkInput.value || '#',
+                align: alignInput.value || 'left',
+                size: sizeInput.value || 'medium',
+                style: styleInput.value || 'primary',
+                border_radius: borderRadiusInput.value || '8px'
+            };
+            
+            // Добавляем кастомные цвета только если они заданы
+            if (bgColorText && bgColorText.value.trim()) {
+                buttonData.bg_color = bgColorText.value.trim();
+            }
+            if (textColorText && textColorText.value.trim()) {
+                buttonData.text_color = textColorText.value.trim();
+            }
+            
+            await updateBlockData(blockId, buttonData);
+            closeEditModal();
+        }
+
+        // Сохранение блока видео
+        async function saveVideoBlock(blockId) {
+            const urlInput = document.getElementById('video-url-input');
+            const widthInput = document.getElementById('video-width-input');
+            const heightInput = document.getElementById('video-height-input');
+            const autoplayInput = document.getElementById('video-autoplay-input');
+            
+            const videoData = {
+                url: urlInput.value || '',
+                width: widthInput.value || '100%',
+                height: heightInput.value || '400px',
+                autoplay: autoplayInput.checked || false
+            };
+            
+            await updateBlockData(blockId, videoData);
+            closeEditModal();
+        }
+
+        // Сохранение блока текста
+        async function saveTextBlock(blockId) {
+            const contentInput = document.getElementById('text-content-input');
+            const sizeInput = document.getElementById('text-size-input');
+            const alignInput = document.getElementById('text-align-input');
+            
+            const textData = {
+                content: contentInput.value || 'Текст блока',
+                size: sizeInput.value || '16px',
+                align: alignInput.value || 'left'
+            };
+            
+            await updateBlockData(blockId, textData);
+            closeEditModal();
+        }
+
+        // Сохранение блока заголовка
+        async function saveHeadingBlock(blockId) {
+            const contentInput = document.getElementById('heading-content-input');
+            const levelInput = document.getElementById('heading-level-input');
+            const alignInput = document.getElementById('heading-align-input');
+            
+            const headingData = {
+                content: contentInput.value || 'Заголовок',
+                level: levelInput.value || 'h1',
+                align: alignInput.value || 'left'
+            };
+            
+            await updateBlockData(blockId, headingData);
+            closeEditModal();
+        }
+
         // Обновление данных блока
         async function updateBlockData(blockId, newData, reload = true) {
             try {
@@ -1761,11 +2238,13 @@
                                              blockItem.querySelector('.block-content > div');
                             }
                             
-                            if (targetElement && newData.width) {
-                                targetElement.style.width = newData.width;
-                            }
-                            if (targetElement && newData.height) {
-                                targetElement.style.height = newData.height;
+                            if (targetElement) {
+                                if (newData.width) {
+                                    targetElement.style.width = newData.width;
+                                }
+                                if (newData.height) {
+                                    targetElement.style.height = newData.height;
+                                }
                             }
                         }
                     }
@@ -1831,11 +2310,18 @@
             if (blockType === 'image') {
                 targetElement = blockItem.querySelector('.block-content img');
             } else if (blockType === 'slider') {
-                targetElement = blockItem.querySelector('.block-content .slider-container') || 
-                               blockItem.querySelector('.block-content > div');
+                // Для слайдера ищем контейнер слайдера
+                targetElement = blockItem.querySelector('.block-content .slider-container');
+                // Если не нашли, ищем первый div внутри block-content
+                if (!targetElement) {
+                    targetElement = blockItem.querySelector('.block-content > div');
+                }
             }
             
-            if (!targetElement || handles.length === 0) return;
+            if (!targetElement || handles.length === 0) {
+                console.log('Не найден targetElement или handles для блока', blockId, blockType);
+                return;
+            }
             
             // Проверяем, не инициализированы ли уже обработчики
             if (blockItem.dataset.resizeInitialized === 'true') return;
@@ -1845,7 +2331,7 @@
             let startX, startY, startWidth, startHeight;
             let currentData = null;
             
-            // Получаем текущие данные блока
+            // Получаем текущие данные блока и устанавливаем начальный размер
             fetch(`/api/blocks/${blockId}/`, {
                 method: 'GET',
                 headers: {
@@ -1856,6 +2342,17 @@
             .then(data => {
                 if (data.success) {
                     currentData = data.block.data || {};
+                    
+                    // Устанавливаем начальный размер из данных
+                    if (currentData.width) {
+                        targetElement.style.width = currentData.width;
+                    }
+                    if (currentData.height) {
+                        targetElement.style.height = currentData.height;
+                    } else if (blockType === 'slider' && !currentData.height) {
+                        // Для слайдера по умолчанию auto
+                        targetElement.style.height = 'auto';
+                    }
                 }
             })
             .catch(error => {
@@ -1873,8 +2370,21 @@
                     
                     // Получаем текущий размер элемента
                     const computedStyle = window.getComputedStyle(targetElement);
-                    startWidth = parseFloat(computedStyle.width) || targetElement.offsetWidth;
-                    startHeight = parseFloat(computedStyle.height) || targetElement.offsetHeight;
+                    const widthValue = computedStyle.width;
+                    const heightValue = computedStyle.height;
+                    
+                    // Парсим размеры, учитывая проценты и пиксели
+                    if (widthValue && widthValue !== 'auto' && widthValue !== '0px' && !widthValue.includes('%')) {
+                        startWidth = parseFloat(widthValue);
+                    } else {
+                        startWidth = targetElement.offsetWidth || 400;
+                    }
+                    
+                    if (heightValue && heightValue !== 'auto' && heightValue !== '0px' && !heightValue.includes('%')) {
+                        startHeight = parseFloat(heightValue);
+                    } else {
+                        startHeight = targetElement.offsetHeight || 300;
+                    }
                     
                     const handleType = handle.dataset.handle;
                     
@@ -1941,6 +2451,82 @@
         document.querySelectorAll('.block-item[data-block-type="image"], .block-item[data-block-type="slider"]').forEach(item => {
             if (item.classList.contains('selected')) {
                 initBlockResizeHandles(item);
+            }
+        });
+
+        // Функции для управления слайдером в редакторе
+        function changeSlide(sliderId, direction) {
+            const container = document.getElementById(sliderId);
+            if (!container) return;
+            
+            const slides = container.querySelectorAll('.slide');
+            if (slides.length === 0) return;
+            
+            const currentSlide = container.querySelector('.slide.active');
+            let currentIndex = Array.from(slides).indexOf(currentSlide);
+            
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = slides.length - 1;
+            if (currentIndex >= slides.length) currentIndex = 0;
+            
+            goToSlide(sliderId, currentIndex);
+        }
+
+        function goToSlide(sliderId, index) {
+            const container = document.getElementById(sliderId);
+            if (!container) return;
+            
+            const slides = container.querySelectorAll('.slide');
+            const indicators = container.querySelectorAll('.slider-indicator');
+            
+            if (index < 0 || index >= slides.length) return;
+            
+            // Убираем активный класс
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+            
+            // Добавляем активный класс
+            slides[index].classList.add('active');
+            if (indicators[index]) {
+                indicators[index].classList.add('active');
+            }
+            
+            // Сбрасываем автопрокрутку
+            if (container.sliderInterval) {
+                clearInterval(container.sliderInterval);
+                startSlider(container);
+            }
+        }
+
+        function startSlider(container) {
+            const autoplay = container.dataset.autoplay === 'true';
+            const interval = parseInt(container.dataset.interval) || 3000;
+            
+            if (!autoplay) return;
+            
+            container.sliderInterval = setInterval(() => {
+                const slides = container.querySelectorAll('.slide');
+                const currentSlide = container.querySelector('.slide.active');
+                let currentIndex = Array.from(slides).indexOf(currentSlide);
+                
+                currentIndex = (currentIndex + 1) % slides.length;
+                goToSlide(container.id, currentIndex);
+            }, interval);
+        }
+
+        // Инициализация всех слайдеров в редакторе
+        document.querySelectorAll('.block-content .slider-container').forEach(container => {
+            const slides = container.querySelectorAll('.slide');
+            if (slides.length > 0) {
+                // Активируем первый слайд
+                slides[0].classList.add('active');
+                const indicators = container.querySelectorAll('.slider-indicator');
+                if (indicators[0]) {
+                    indicators[0].classList.add('active');
+                }
+                
+                // Запускаем автопрокрутку
+                startSlider(container);
             }
         });
     </script>

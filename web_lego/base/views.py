@@ -9,6 +9,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.db import models
 import json
 
@@ -93,6 +94,7 @@ def edit_website(request, website_id):
         'blocks': blocks
     })
 
+@xframe_options_exempt
 def view_website(request, website_id):
     website = get_object_or_404(Website, id=website_id)
     blocks = website.blocks.filter(is_active=True)
