@@ -13,7 +13,9 @@ urlpatterns = [
     
     # API endpoints для блоков
     path('api/websites/<int:website_id>/blocks/', views.api_create_block, name='api_create_block'),
-    path('api/blocks/<int:block_id>/', views.api_update_block, name='api_update_block'),
+    path('api/blocks/<int:block_id>/', views.api_get_block, name='api_get_block'),
+    path('api/blocks/<int:block_id>/update/', views.api_update_block, name='api_update_block'),
     path('api/blocks/<int:block_id>/delete/', views.api_delete_block, name='api_delete_block'),
+    path('api/blocks/<int:block_id>/upload-image/', views.api_upload_block_image, name='api_upload_block_image'),
     path('api/websites/<int:website_id>/blocks/reorder/', views.api_reorder_blocks, name='api_reorder_blocks'),
 ]

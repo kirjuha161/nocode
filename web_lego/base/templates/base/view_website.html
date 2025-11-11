@@ -70,17 +70,94 @@
         }
 
         /* Стили для слайдера */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
         .slider {
             position: relative;
             overflow: hidden;
+            width: 100%;
+            min-height: 300px;
         }
 
         .slide {
             display: none;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .slide.active {
             display: block;
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(139, 92, 246, 0.8);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-btn:hover {
+            background: rgba(124, 58, 237, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slider-prev {
+            left: 20px;
+        }
+
+        .slider-next {
+            right: 20px;
+        }
+
+        .slider-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .slider-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(139, 92, 246, 0.5);
+        }
+
+        .slider-indicator:hover,
+        .slider-indicator.active {
+            background: rgba(139, 92, 246, 1);
+            transform: scale(1.2);
         }
 
         img {
@@ -141,18 +218,79 @@
     {% endif %}
 
     <script>
-        // Простой слайдер
-        document.querySelectorAll('.slider').forEach(slider => {
-            const slides = slider.querySelectorAll('.slide');
-            if (slides.length > 0) {
-                let currentSlide = 0;
-                slides[0].classList.add('active');
+        // Функции для управления слайдером
+        function changeSlide(sliderId, direction) {
+            const container = document.getElementById(sliderId);
+            if (!container) return;
+            
+            const slides = container.querySelectorAll('.slide');
+            if (slides.length === 0) return;
+            
+            const currentSlide = container.querySelector('.slide.active');
+            let currentIndex = Array.from(slides).indexOf(currentSlide);
+            
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = slides.length - 1;
+            if (currentIndex >= slides.length) currentIndex = 0;
+            
+            goToSlide(sliderId, currentIndex);
+        }
+
+        function goToSlide(sliderId, index) {
+            const container = document.getElementById(sliderId);
+            if (!container) return;
+            
+            const slides = container.querySelectorAll('.slide');
+            const indicators = container.querySelectorAll('.slider-indicator');
+            
+            if (index < 0 || index >= slides.length) return;
+            
+            // Убираем активный класс
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+            
+            // Добавляем активный класс
+            slides[index].classList.add('active');
+            if (indicators[index]) {
+                indicators[index].classList.add('active');
+            }
+            
+            // Сбрасываем автопрокрутку
+            if (container.sliderInterval) {
+                clearInterval(container.sliderInterval);
+                startSlider(container);
+            }
+        }
+
+        function startSlider(container) {
+            const autoplay = container.dataset.autoplay === 'true';
+            const interval = parseInt(container.dataset.interval) || 3000;
+            
+            if (!autoplay) return;
+            
+            container.sliderInterval = setInterval(() => {
+                const slides = container.querySelectorAll('.slide');
+                const currentSlide = container.querySelector('.slide.active');
+                let currentIndex = Array.from(slides).indexOf(currentSlide);
                 
-                setInterval(() => {
-                    slides[currentSlide].classList.remove('active');
-                    currentSlide = (currentSlide + 1) % slides.length;
-                    slides[currentSlide].classList.add('active');
-                }, 3000);
+                currentIndex = (currentIndex + 1) % slides.length;
+                goToSlide(container.id, currentIndex);
+            }, interval);
+        }
+
+        // Инициализация всех слайдеров
+        document.querySelectorAll('.slider-container').forEach(container => {
+            const slides = container.querySelectorAll('.slide');
+            if (slides.length > 0) {
+                // Активируем первый слайд
+                slides[0].classList.add('active');
+                const indicators = container.querySelectorAll('.slider-indicator');
+                if (indicators[0]) {
+                    indicators[0].classList.add('active');
+                }
+                
+                // Запускаем автопрокрутку
+                startSlider(container);
             }
         });
     </script>

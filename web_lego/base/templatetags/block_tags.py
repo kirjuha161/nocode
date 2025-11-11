@@ -36,12 +36,19 @@ def render_block(block):
         return mark_safe(f'<p style="font-size: {size}; text-align: {align}; {style_attr}">{content}</p>')
     
     elif block_type == 'image':
-        url = data.get('url', '')
+        # Приоритет: загруженное изображение > URL из данных
+        image_url = ''
+        if block.image:
+            image_url = block.image.url
+        else:
+            image_url = data.get('url', '')
+        
         alt = data.get('alt', 'Изображение')
         width = data.get('width', '100%')
         height = data.get('height', 'auto')
-        if url:
-            return mark_safe(f'<img src="{url}" alt="{alt}" style="width: {width}; height: {height}; {style_attr}" />')
+        
+        if image_url:
+            return mark_safe(f'<img src="{image_url}" alt="{alt}" style="width: {width}; height: {height}; {style_attr}" />')
         else:
             return mark_safe(f'<div style="background: #e5e7eb; min-height: 200px; display: flex; align-items: center; justify-content: center; {style_attr}">🖼️ Изображение</div>')
     
@@ -75,12 +82,45 @@ def render_block(block):
     
     elif block_type == 'slider':
         images = data.get('images', [])
+        autoplay = data.get('autoplay', True)
+        interval = data.get('interval', 3000)
+        width = data.get('width', '100%')
+        height = data.get('height', 'auto')
+        
         if images:
-            # Простой слайдер на HTML/CSS
-            slides = ''.join([f'<div class="slide"><img src="{img}" style="width: 100%; height: auto;" /></div>' for img in images])
-            return mark_safe(f'<div class="slider" style="{style_attr}">{slides}</div>')
+            # Слайдер с навигацией и индикаторами
+            slider_id = f'slider-{block.id}'
+            slides = ''.join([f'<div class="slide" data-slide-index="{idx}"><img src="{img}" style="width: 100%; height: auto; display: block;" alt="Slide {idx + 1}" /></div>' for idx, img in enumerate(images)])
+            
+            # Индикаторы
+            indicators = ''.join([f'<span class="slider-indicator" data-slide="{idx}" onclick="goToSlide(\'{slider_id}\', {idx})"></span>' for idx in range(len(images))])
+            
+            # Кнопки навигации
+            nav_buttons = f'''
+                <button class="slider-btn slider-prev" onclick="changeSlide(\'{slider_id}\', -1)">‹</button>
+                <button class="slider-btn slider-next" onclick="changeSlide(\'{slider_id}\', 1)">›</button>
+            '''
+            
+            # Добавляем размеры к стилям
+            size_styles = f'width: {width}; height: {height};'
+            full_style = f'{size_styles} {style_attr}' if style_attr else size_styles
+            
+            slider_html = f'''
+                <div class="slider-container" id="{slider_id}" data-autoplay="{str(autoplay).lower()}" data-interval="{interval}" style="{full_style}">
+                    <div class="slider">
+                        {slides}
+                    </div>
+                    <div class="slider-indicators">
+                        {indicators}
+                    </div>
+                    {nav_buttons}
+                </div>
+            '''
+            return mark_safe(slider_html)
         else:
-            return mark_safe(f'<div style="background: #e5e7eb; min-height: 300px; display: flex; align-items: center; justify-content: center; {style_attr}">🎠 Слайдер (добавьте изображения)</div>')
+            size_styles = f'width: {width}; height: {height};'
+            full_style = f'{size_styles} {style_attr}' if style_attr else size_styles
+            return mark_safe(f'<div style="background: #e5e7eb; min-height: 300px; display: flex; align-items: center; justify-content: center; {full_style}">🎠 Слайдер (добавьте изображения)</div>')
     
     elif block_type == 'section':
         content = data.get('content', '')

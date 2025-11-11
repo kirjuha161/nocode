@@ -145,6 +145,27 @@ def api_create_block(request, website_id):
 
 
 @login_required
+@require_http_methods(["GET"])
+def api_get_block(request, block_id):
+    """Получить информацию о блоке"""
+    block = get_object_or_404(Block, id=block_id)
+    
+    if block.website.owner != request.user:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    return JsonResponse({
+        'success': True,
+        'block': {
+            'id': block.id,
+            'block_type': block.block_type,
+            'order': block.order,
+            'data': block.get_data(),
+            'image_url': block.image.url if block.image else None
+        }
+    })
+
+
+@login_required
 @require_http_methods(["PUT", "PATCH"])
 def api_update_block(request, block_id):
     """Обновить блок"""
@@ -154,6 +175,25 @@ def api_update_block(request, block_id):
         return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
     
     try:
+        # Проверяем, есть ли загруженный файл
+        if request.FILES and 'image' in request.FILES:
+            block.image = request.FILES['image']
+            block.save()
+            return JsonResponse({
+                'success': True,
+                'block': {
+                    'id': block.id,
+                    'block_type': block.block_type,
+                    'order': block.order,
+                    'data': block.get_data(),
+                    'image_url': block.image.url if block.image else None
+                }
+            })
+        
+        # Обычное обновление через JSON
+        if not request.body:
+            return JsonResponse({'success': False, 'error': 'Нет данных для обновления'}, status=400)
+        
         data = json.loads(request.body)
         
         if 'data' in data:
@@ -179,7 +219,8 @@ def api_update_block(request, block_id):
                 'id': block.id,
                 'block_type': block.block_type,
                 'order': block.order,
-                'data': block.get_data()
+                'data': block.get_data(),
+                'image_url': block.image.url if block.image else None
             }
         })
     except Exception as e:
@@ -215,5 +256,30 @@ def api_reorder_blocks(request, website_id):
             block.save()
         
         return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_upload_block_image(request, block_id):
+    """Загрузить изображение для блока"""
+    block = get_object_or_404(Block, id=block_id)
+    
+    if block.website.owner != request.user:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    if 'image' not in request.FILES:
+        return JsonResponse({'success': False, 'error': 'Изображение не предоставлено'}, status=400)
+    
+    try:
+        block.image = request.FILES['image']
+        block.save()
+        
+        return JsonResponse({
+            'success': True,
+            'image_url': block.image.url,
+            'block_id': block.id
+        })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

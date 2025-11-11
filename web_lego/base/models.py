@@ -56,6 +56,9 @@ class Block(models.Model):
     # Это позволяет легко расширять функциональность без изменения схемы БД
     data = models.JSONField(default=dict, verbose_name="Данные блока")
     
+    # Поле для загрузки изображений (для блоков типа image)
+    image = models.ImageField(upload_to='blocks/images/', blank=True, null=True, verbose_name="Изображение")
+    
     # Стили блока
     background_color = models.CharField(max_length=7, blank=True, null=True, verbose_name="Цвет фона")
     text_color = models.CharField(max_length=7, blank=True, null=True, verbose_name="Цвет текста")
@@ -81,7 +84,7 @@ class Block(models.Model):
             'image': {'url': '', 'alt': 'Изображение', 'width': '100%', 'height': 'auto'},
             'video': {'url': '', 'width': '100%', 'height': '400px', 'autoplay': False},
             'button': {'text': 'Кнопка', 'link': '#', 'style': 'primary', 'align': 'left'},
-            'slider': {'images': [], 'autoplay': True, 'interval': 3000},
+            'slider': {'images': [], 'autoplay': True, 'interval': 3000, 'width': '100%', 'height': 'auto'},
             'section': {'content': '', 'columns': 1},
         }
         block_defaults = defaults.get(self.block_type, {})
