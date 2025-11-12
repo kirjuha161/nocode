@@ -179,6 +179,8 @@ body {
     padding: 2rem 0;
     text-align: center;
     margin-top: 219px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .footer-content {
@@ -198,32 +200,185 @@ body {
 .footer-links {
     display: flex;
     gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .footer-link {
     color: #d1d5db;
     text-decoration: none;
     transition: color 0.3s ease;
+    white-space: nowrap;
 }
 
 .footer-link:hover {
     color: #8b5cf6;
 }
 
+.footer p {
+    margin-top: 2rem;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-    .nav-links {
+    .container {
+        padding: 0 15px;
+    }
+
+    .nav {
         flex-direction: column;
         gap: 1rem;
+        align-items: flex-start;
     }
-    
+
+    .logo {
+        font-size: 1.5rem;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .dashboard {
+        padding: 2rem 0;
+    }
+
+    .websites-section {
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        margin-left: 0;
+        margin-top: 0;
+    }
+
     .websites-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
-    
+
+    .website-card {
+        padding: 1.25rem;
+    }
+
+    .website-title {
+        font-size: 1.1rem;
+    }
+
+    .website-actions {
+        flex-direction: column;
+    }
+
+    .btn-small {
+        width: 100%;
+        text-align: center;
+    }
+
+    .footer {
+        margin-top: 2rem;
+        padding: 1.5rem 0;
+    }
+
+    .footer .container {
+        padding: 0 1rem;
+    }
+
     .footer-content {
         flex-direction: column;
         text-align: center;
+        gap: 1.25rem;
+        align-items: center;
+    }
+
+    .footer-logo {
+        font-size: 1.25rem;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+        align-items: center;
+    }
+
+    .footer-link {
+        padding: 0.5rem 0;
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    .footer p {
+        margin-top: 1.5rem;
+        padding: 0 1rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        word-wrap: break-word;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px;
+    }
+
+    .logo {
+        font-size: 1.25rem;
+    }
+
+    .websites-section {
+        padding: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .website-card {
+        padding: 1rem;
+    }
+
+    .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    .footer {
+        margin-top: 1.5rem;
+        padding: 1.25rem 0;
+    }
+
+    .footer .container {
+        padding: 0 0.75rem;
+    }
+
+    .footer-logo {
+        font-size: 1.1rem;
+    }
+
+    .footer-link {
+        font-size: 0.85rem;
+    }
+
+    .footer p {
+        margin-top: 1.25rem;
+        padding: 0 0.75rem;
+        font-size: 0.75rem;
+        line-height: 1.4;
     }
 }
 

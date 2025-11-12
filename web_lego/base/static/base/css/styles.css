@@ -35,3 +35,18 @@
         .btn-delete:hover {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
         }
+
+/* Глобальные адаптивные стили */
+@media (max-width: 768px) {
+    .purple-btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .purple-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}

@@ -876,14 +876,192 @@ body {
 }
 
 @media (max-width: 968px) {
+    .nav {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        width: 100%;
+        text-align: center;
+    }
+
     .editor-container {
         flex-direction: column;
+        height: auto;
     }
     
     .blocks-panel,
     .settings-panel {
         width: 100%;
+        max-height: 300px;
+        border-right: none;
+        border-left: none;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .blocks-panel {
+        order: 1;
+    }
+
+    .editor-area {
+        order: 2;
+        padding: 1rem;
+    }
+
+    .settings-panel {
+        order: 3;
+        border-top: 2px solid #e5e7eb;
+        border-bottom: none;
+    }
+
+    .editor-canvas {
+        padding: 1.5rem;
+        min-height: 400px;
+    }
+
+    .block-types {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .block-type-btn {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav {
+        padding: 0.75rem;
+    }
+
+    .logo {
+        font-size: 1.25rem;
+    }
+
+    .blocks-panel,
+    .settings-panel {
+        padding: 1rem;
+        max-height: 250px;
+    }
+
+    .blocks-panel h3,
+    .settings-panel h3 {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .block-types {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .block-type-btn {
+        padding: 0.625rem;
+        font-size: 0.75rem;
+    }
+
+    .editor-area {
+        padding: 0.75rem;
+    }
+
+    .editor-canvas {
+        padding: 1rem;
+        min-height: 300px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+    }
+
+    .form-input {
+        padding: 0.625rem;
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .preview-content {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .preview-content iframe {
+        height: 70vh;
+    }
+
+    .edit-modal-content {
+        width: 95%;
+        padding: 1.5rem;
+        max-height: 85vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav {
+        padding: 0.5rem;
+    }
+
+    .logo {
+        font-size: 1.1rem;
+    }
+
+    .nav-link {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .blocks-panel,
+    .settings-panel {
+        padding: 0.75rem;
         max-height: 200px;
+    }
+
+    .block-types {
+        grid-template-columns: 1fr;
+    }
+
+    .editor-canvas {
+        padding: 0.75rem;
+    }
+
+    .block-item {
+        padding: 0.75rem;
+    }
+
+    .block-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+
+    .preview-content {
+        margin: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .preview-content iframe {
+        height: 60vh;
+    }
+
+    .edit-modal-content {
+        padding: 1rem;
     }
 }
 
