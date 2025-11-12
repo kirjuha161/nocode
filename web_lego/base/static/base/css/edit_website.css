@@ -122,25 +122,31 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 2rem;
+    position: relative;
 }
 
 .block-item {
-    position: relative;
-    margin-bottom: 1rem;
-    border: 2px dashed transparent;
+    position: absolute;
+    border: 2px solid transparent;
     border-radius: 8px;
     padding: 1rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     cursor: move;
+    min-width: 150px;
+    min-height: 100px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .block-item:hover {
     border-color: #8b5cf6;
     background: #faf5ff;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 
 .block-item.dragging {
-    opacity: 0.5;
+    opacity: 0.6;
+    z-index: 900;
 }
 
 .block-item.drag-over {
@@ -151,7 +157,7 @@ body {
 .block-item.selected {
     border-color: #8b5cf6;
     background: #faf5ff;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3), 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 
 .block-item.selected[data-block-type="image"],
@@ -869,6 +875,7 @@ body {
 }
 
 @media (max-width: 1200px) {
+
     .blocks-panel,
     .settings-panel {
         width: 250px;
@@ -899,7 +906,7 @@ body {
         flex-direction: column;
         height: auto;
     }
-    
+
     .blocks-panel,
     .settings-panel {
         width: 100%;
@@ -1064,4 +1071,3 @@ body {
         padding: 1rem;
     }
 }
-

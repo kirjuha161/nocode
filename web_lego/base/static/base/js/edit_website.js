@@ -6,7 +6,7 @@ let draggedElement = null;
 let dragOverElement = null;
 
 // Drag & Drop для новых блоков из панели
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.block-type-btn').forEach(btn => {
         btn.addEventListener('dragstart', (e) => {
             draggedBlock = e.target.dataset.type;
@@ -46,19 +46,19 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('drop', async (e) => {
             e.preventDefault();
             item.classList.remove('drag-over');
-            
+
             if (draggedElement && draggedElement !== item) {
                 // Перемещение существующего блока
                 const allBlocks = Array.from(document.querySelectorAll('.block-item'));
                 const draggedIndex = allBlocks.indexOf(draggedElement);
                 const targetIndex = allBlocks.indexOf(item);
-                
+
                 if (draggedIndex < targetIndex) {
                     item.parentNode.insertBefore(draggedElement, item.nextSibling);
                 } else {
                     item.parentNode.insertBefore(draggedElement, item);
                 }
-                
+
                 await reorderBlocks();
             }
         });
@@ -88,15 +88,22 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', (e) => {
             if (e.target.closest('.block-controls')) return;
             if (e.target.closest('.block-resize-handle')) return;
-            
+
             document.querySelectorAll('.block-item').forEach(b => b.classList.remove('selected'));
             item.classList.add('selected');
             selectedBlock = item.dataset.blockId;
-            
+
+            console.log('Блок выбран:', { blockId: selectedBlock, blockType: item.dataset.blockType });
+
             // Инициализируем обработчики изменения размера для блоков изображения и слайдера
-            if (item.dataset.blockType === 'image' || item.dataset.blockType === 'slider') {
+            const blockType = item.dataset.blockType;
+            if (blockType === 'image' || blockType === 'slider') {
+                console.log('🔧 Инициализирую обработчики для типа:', blockType);
                 initBlockResizeHandles(item);
             }
+
+            // Инициализация обработчиков перемещения для всех блоков
+            initBlockDragHandles(item);
         });
     });
 
@@ -105,6 +112,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (item.classList.contains('selected')) {
             initBlockResizeHandles(item);
         }
+    });
+
+    // Инициализация обработчиков перемещения для всех блоков
+    document.querySelectorAll('.block-item').forEach(item => {
+        initBlockDragHandles(item);
     });
 
     // Инициализация всех слайдеров в редакторе
@@ -117,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (indicators[0]) {
                 indicators[0].classList.add('active');
             }
-            
+
             // Запускаем автопрокрутку
             startSlider(container);
         }
@@ -126,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Закрытие модального окна при клике вне его
     const editModal = document.getElementById('edit-modal');
     if (editModal) {
-        editModal.addEventListener('click', function(e) {
+        editModal.addEventListener('click', function (e) {
             if (e.target === this) {
                 closeEditModal();
             }
@@ -140,7 +152,7 @@ async function createBlock(blockType) {
         alert('Ошибка: ID сайта не найден');
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/websites/${websiteId}/blocks/`, {
             method: 'POST',
@@ -167,7 +179,7 @@ async function createBlock(blockType) {
 // Переупорядочивание блоков
 async function reorderBlocks() {
     if (!websiteId) return;
-    
+
     const blocks = Array.from(document.querySelectorAll('.block-item'));
     const blockOrders = blocks.map((block, index) => ({
         id: parseInt(block.dataset.blockId),
@@ -224,10 +236,10 @@ async function deleteBlock(blockId) {
 function editBlock(blockId) {
     const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
     if (!blockElement) return;
-    
+
     blockElement.classList.add('selected');
     selectedBlock = blockId;
-    
+
     // Открываем модальное окно для редактирования
     const blockType = blockElement.dataset.blockType;
     openEditModal(blockId, blockType);
@@ -237,9 +249,9 @@ function editBlock(blockId) {
 function openEditModal(blockId, blockType) {
     const modal = document.getElementById('edit-modal');
     const modalBody = document.getElementById('edit-modal-body');
-    
+
     if (!modal || !modalBody) return;
-    
+
     if (blockType === 'text') {
         // Получаем информацию о блоке текста
         fetch(`/api/blocks/${blockId}/`, {
@@ -248,14 +260,14 @@ function openEditModal(blockId, blockType) {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            const textData = data.block?.data || {};
-            const content = textData.content || 'Текст блока';
-            const size = textData.size || '16px';
-            const align = textData.align || 'left';
-            
-            modalBody.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                const textData = data.block?.data || {};
+                const content = textData.content || 'Текст блока';
+                const size = textData.size || '16px';
+                const align = textData.align || 'left';
+
+                modalBody.innerHTML = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">📄 Редактировать текст</h3>
                 <form id="text-edit-form">
                     <div class="form-group">
@@ -281,13 +293,13 @@ function openEditModal(blockId, blockType) {
                     </div>
                 </form>
             `;
-            
-            modal.classList.add('active');
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки данных блока:', error);
-            alert('Ошибка загрузки данных блока');
-        });
+
+                modal.classList.add('active');
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных блока:', error);
+                alert('Ошибка загрузки данных блока');
+            });
     } else if (blockType === 'heading') {
         // Получаем информацию о блоке заголовка
         fetch(`/api/blocks/${blockId}/`, {
@@ -296,14 +308,14 @@ function openEditModal(blockId, blockType) {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            const headingData = data.block?.data || {};
-            const content = headingData.content || 'Заголовок';
-            const level = headingData.level || 'h1';
-            const align = headingData.align || 'left';
-            
-            modalBody.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                const headingData = data.block?.data || {};
+                const content = headingData.content || 'Заголовок';
+                const level = headingData.level || 'h1';
+                const align = headingData.align || 'left';
+
+                modalBody.innerHTML = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">📝 Редактировать заголовок</h3>
                 <form id="heading-edit-form">
                     <div class="form-group">
@@ -335,13 +347,13 @@ function openEditModal(blockId, blockType) {
                     </div>
                 </form>
             `;
-            
-            modal.classList.add('active');
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки данных блока:', error);
-            alert('Ошибка загрузки данных блока');
-        });
+
+                modal.classList.add('active');
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных блока:', error);
+                alert('Ошибка загрузки данных блока');
+            });
     } else if (blockType === 'image') {
         // Получаем информацию о блоке
         fetch(`/api/blocks/${blockId}/`, {
@@ -350,10 +362,10 @@ function openEditModal(blockId, blockType) {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            const currentImageUrl = data.block?.image_url || '';
-            modalBody.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                const currentImageUrl = data.block?.image_url || '';
+                modalBody.innerHTML = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">🖼️ Редактировать изображение</h3>
                 <form id="image-edit-form" enctype="multipart/form-data">
                     <div class="form-group">
@@ -427,209 +439,209 @@ function openEditModal(blockId, blockType) {
                     </div>
                 </form>
             `;
-            
-            // Предпросмотр загружаемого изображения
-            const fileInput = document.getElementById('image-file-input');
-            const preview = document.getElementById('image-preview');
-            const currentPreview = document.getElementById('current-image-preview');
-            const widthInput = document.getElementById('image-width-input');
-            const heightInput = document.getElementById('image-height-input');
-            
-            const currentContainer = document.getElementById('current-image-container');
-            const previewContainer = document.getElementById('image-preview-container');
-            
-            // Функция для обновления предпросмотра размера
-            function updatePreviewSize() {
-                const width = widthInput.value || '100%';
-                const height = heightInput.value || 'auto';
-                
-                // Парсим значение для применения
-                let widthValue = width;
-                let heightValue = height;
-                
-                // Если это процент, применяем как есть, иначе конвертируем в px
-                if (width && !width.includes('%') && !width.includes('px')) {
-                    widthValue = width + 'px';
+
+                // Предпросмотр загружаемого изображения
+                const fileInput = document.getElementById('image-file-input');
+                const preview = document.getElementById('image-preview');
+                const currentPreview = document.getElementById('current-image-preview');
+                const widthInput = document.getElementById('image-width-input');
+                const heightInput = document.getElementById('image-height-input');
+
+                const currentContainer = document.getElementById('current-image-container');
+                const previewContainer = document.getElementById('image-preview-container');
+
+                // Функция для обновления предпросмотра размера
+                function updatePreviewSize() {
+                    const width = widthInput.value || '100%';
+                    const height = heightInput.value || 'auto';
+
+                    // Парсим значение для применения
+                    let widthValue = width;
+                    let heightValue = height;
+
+                    // Если это процент, применяем как есть, иначе конвертируем в px
+                    if (width && !width.includes('%') && !width.includes('px')) {
+                        widthValue = width + 'px';
+                    }
+                    if (height && height !== 'auto' && !height.includes('%') && !height.includes('px')) {
+                        heightValue = height + 'px';
+                    }
+
+                    if (preview && previewContainer && previewContainer.style.display !== 'none') {
+                        preview.style.width = widthValue;
+                        preview.style.height = heightValue;
+                        previewContainer.style.width = widthValue;
+                    }
+                    if (currentPreview && currentContainer && currentContainer.style.display !== 'none') {
+                        currentPreview.style.width = widthValue;
+                        currentPreview.style.height = heightValue;
+                        currentContainer.style.width = widthValue;
+                    }
                 }
-                if (height && height !== 'auto' && !height.includes('%') && !height.includes('px')) {
-                    heightValue = height + 'px';
+
+                // Функция для обновления полей ввода из размера контейнера
+                function updateSizeInputs(container) {
+                    if (!container) return;
+                    const computedStyle = window.getComputedStyle(container);
+                    const width = computedStyle.width;
+                    const height = computedStyle.height;
+
+                    if (widthInput) {
+                        widthInput.value = width;
+                    }
+                    if (heightInput && height !== 'auto') {
+                        heightInput.value = height;
+                    }
                 }
-                
-                if (preview && previewContainer && previewContainer.style.display !== 'none') {
-                    preview.style.width = widthValue;
-                    preview.style.height = heightValue;
-                    previewContainer.style.width = widthValue;
+
+                // Инициализация размера для текущего изображения
+                if (currentContainer) {
+                    // Устанавливаем начальный размер на основе данных блока
+                    const initialWidth = widthInput.value || '100%';
+                    const initialHeight = heightInput.value || 'auto';
+
+                    const currentImg = currentContainer.querySelector('.image-preview');
+                    if (currentImg) {
+                        // Если размер в процентах, оставляем как есть, иначе применяем
+                        if (initialWidth && !initialWidth.includes('%')) {
+                            const widthPx = initialWidth.includes('px') ? initialWidth : initialWidth + 'px';
+                            currentImg.style.width = widthPx;
+                            currentContainer.style.width = widthPx;
+                        } else {
+                            currentImg.style.width = initialWidth;
+                            currentContainer.style.width = initialWidth;
+                        }
+
+                        if (initialHeight && initialHeight !== 'auto') {
+                            const heightPx = initialHeight.includes('px') ? initialHeight : initialHeight + 'px';
+                            currentImg.style.height = heightPx;
+                        } else {
+                            currentImg.style.height = initialHeight;
+                        }
+                    }
+                    updatePreviewSize();
                 }
-                if (currentPreview && currentContainer && currentContainer.style.display !== 'none') {
-                    currentPreview.style.width = widthValue;
-                    currentPreview.style.height = heightValue;
-                    currentContainer.style.width = widthValue;
-                }
-            }
-            
-            // Функция для обновления полей ввода из размера контейнера
-            function updateSizeInputs(container) {
-                if (!container) return;
-                const computedStyle = window.getComputedStyle(container);
-                const width = computedStyle.width;
-                const height = computedStyle.height;
-                
+
+                // Обновление размера при изменении полей
                 if (widthInput) {
-                    widthInput.value = width;
+                    widthInput.addEventListener('input', updatePreviewSize);
                 }
-                if (heightInput && height !== 'auto') {
-                    heightInput.value = height;
+                if (heightInput) {
+                    heightInput.addEventListener('input', updatePreviewSize);
                 }
-            }
-            
-            // Инициализация размера для текущего изображения
-            if (currentContainer) {
-                // Устанавливаем начальный размер на основе данных блока
-                const initialWidth = widthInput.value || '100%';
-                const initialHeight = heightInput.value || 'auto';
-                
-                const currentImg = currentContainer.querySelector('.image-preview');
-                if (currentImg) {
-                    // Если размер в процентах, оставляем как есть, иначе применяем
-                    if (initialWidth && !initialWidth.includes('%')) {
-                        const widthPx = initialWidth.includes('px') ? initialWidth : initialWidth + 'px';
-                        currentImg.style.width = widthPx;
-                        currentContainer.style.width = widthPx;
-                    } else {
-                        currentImg.style.width = initialWidth;
-                        currentContainer.style.width = initialWidth;
-                    }
-                    
-                    if (initialHeight && initialHeight !== 'auto') {
-                        const heightPx = initialHeight.includes('px') ? initialHeight : initialHeight + 'px';
-                        currentImg.style.height = heightPx;
-                    } else {
-                        currentImg.style.height = initialHeight;
-                    }
-                }
-                updatePreviewSize();
-            }
-            
-            // Обновление размера при изменении полей
-            if (widthInput) {
-                widthInput.addEventListener('input', updatePreviewSize);
-            }
-            if (heightInput) {
-                heightInput.addEventListener('input', updatePreviewSize);
-            }
-            
-            if (fileInput) {
-                fileInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            if (preview) preview.src = e.target.result;
-                            if (previewContainer) previewContainer.style.display = 'block';
-                            const wrapper = document.getElementById('image-preview-wrapper');
-                            if (wrapper) wrapper.style.display = 'block';
-                            if (currentContainer) {
-                                currentContainer.style.display = 'none';
-                            }
-                            updatePreviewSize();
-                            initResizeHandles(previewContainer);
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-            
-            // Инициализация обработчиков изменения размера
-            function initResizeHandles(container) {
-                if (!container) return;
-                
-                const handles = container.querySelectorAll('.resize-handle');
-                let isResizing = false;
-                let startX, startY, startWidth, startHeight;
-                
-                handles.forEach(handle => {
-                    handle.addEventListener('mousedown', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        isResizing = true;
-                        startX = e.clientX;
-                        startY = e.clientY;
-                        
-                        const img = container.querySelector('.image-preview');
-                        if (img) {
-                            startWidth = img.offsetWidth;
-                            startHeight = img.offsetHeight;
-                        }
-                        
-                        const handleType = handle.dataset.handle;
-                        
-                        document.addEventListener('mousemove', handleMouseMove);
-                        document.addEventListener('mouseup', handleMouseUp);
-                        
-                        function handleMouseMove(e) {
-                            if (!isResizing) return;
-                            
-                            const deltaX = e.clientX - startX;
-                            const deltaY = e.clientY - startY;
-                            
-                            let newWidth = startWidth;
-                            let newHeight = startHeight;
-                            
-                            // Определяем направление изменения размера
-                            if (handleType.includes('e')) {
-                                newWidth = startWidth + deltaX;
-                            }
-                            if (handleType.includes('w')) {
-                                newWidth = startWidth - deltaX;
-                            }
-                            if (handleType.includes('s')) {
-                                newHeight = startHeight + deltaY;
-                            }
-                            if (handleType.includes('n')) {
-                                newHeight = startHeight - deltaY;
-                            }
-                            
-                            // Ограничения минимального размера
-                            newWidth = Math.max(50, newWidth);
-                            newHeight = Math.max(50, newHeight);
-                            
-                            // Применяем размеры
-                            const img = container.querySelector('.image-preview');
-                            if (img) {
-                                img.style.width = newWidth + 'px';
-                                img.style.height = newHeight + 'px';
-                                container.style.width = newWidth + 'px';
-                            }
-                            
-                            // Обновляем поля ввода
-                            if (widthInput) {
-                                widthInput.value = newWidth + 'px';
-                            }
-                            if (heightInput) {
-                                heightInput.value = newHeight + 'px';
-                            }
-                        }
-                        
-                        function handleMouseUp() {
-                            isResizing = false;
-                            document.removeEventListener('mousemove', handleMouseMove);
-                            document.removeEventListener('mouseup', handleMouseUp);
+
+                if (fileInput) {
+                    fileInput.addEventListener('change', function (e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                if (preview) preview.src = e.target.result;
+                                if (previewContainer) previewContainer.style.display = 'block';
+                                const wrapper = document.getElementById('image-preview-wrapper');
+                                if (wrapper) wrapper.style.display = 'block';
+                                if (currentContainer) {
+                                    currentContainer.style.display = 'none';
+                                }
+                                updatePreviewSize();
+                                initResizeHandles(previewContainer);
+                            };
+                            reader.readAsDataURL(file);
                         }
                     });
-                });
-            }
-            
-            // Инициализация для текущего изображения
-            if (currentContainer) {
-                initResizeHandles(currentContainer);
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки данных блока:', error);
-            alert('Ошибка загрузки данных блока');
-        });
-        
+                }
+
+                // Инициализация обработчиков изменения размера
+                function initResizeHandles(container) {
+                    if (!container) return;
+
+                    const handles = container.querySelectorAll('.resize-handle');
+                    let isResizing = false;
+                    let startX, startY, startWidth, startHeight;
+
+                    handles.forEach(handle => {
+                        handle.addEventListener('mousedown', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            isResizing = true;
+                            startX = e.clientX;
+                            startY = e.clientY;
+
+                            const img = container.querySelector('.image-preview');
+                            if (img) {
+                                startWidth = img.offsetWidth;
+                                startHeight = img.offsetHeight;
+                            }
+
+                            const handleType = handle.dataset.handle;
+
+                            document.addEventListener('mousemove', handleMouseMove);
+                            document.addEventListener('mouseup', handleMouseUp);
+
+                            function handleMouseMove(e) {
+                                if (!isResizing) return;
+
+                                const deltaX = e.clientX - startX;
+                                const deltaY = e.clientY - startY;
+
+                                let newWidth = startWidth;
+                                let newHeight = startHeight;
+
+                                // Определяем направление изменения размера
+                                if (handleType.includes('e')) {
+                                    newWidth = startWidth + deltaX;
+                                }
+                                if (handleType.includes('w')) {
+                                    newWidth = startWidth - deltaX;
+                                }
+                                if (handleType.includes('s')) {
+                                    newHeight = startHeight + deltaY;
+                                }
+                                if (handleType.includes('n')) {
+                                    newHeight = startHeight - deltaY;
+                                }
+
+                                // Ограничения минимального размера
+                                newWidth = Math.max(50, newWidth);
+                                newHeight = Math.max(50, newHeight);
+
+                                // Применяем размеры
+                                const img = container.querySelector('.image-preview');
+                                if (img) {
+                                    img.style.width = newWidth + 'px';
+                                    img.style.height = newHeight + 'px';
+                                    container.style.width = newWidth + 'px';
+                                }
+
+                                // Обновляем поля ввода
+                                if (widthInput) {
+                                    widthInput.value = newWidth + 'px';
+                                }
+                                if (heightInput) {
+                                    heightInput.value = newHeight + 'px';
+                                }
+                            }
+
+                            function handleMouseUp() {
+                                isResizing = false;
+                                document.removeEventListener('mousemove', handleMouseMove);
+                                document.removeEventListener('mouseup', handleMouseUp);
+                            }
+                        });
+                    });
+                }
+
+                // Инициализация для текущего изображения
+                if (currentContainer) {
+                    initResizeHandles(currentContainer);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных блока:', error);
+                alert('Ошибка загрузки данных блока');
+            });
+
         modal.classList.add('active');
     } else if (blockType === 'slider') {
         // Получаем информацию о блоке слайдера
@@ -639,16 +651,16 @@ function openEditModal(blockId, blockType) {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            const images = data.block?.data?.images || [];
-            const autoplay = data.block?.data?.autoplay !== false;
-            const interval = data.block?.data?.interval || 3000;
-            
-            // Инициализируем массив изображений
-            sliderImages = [...images];
-            
-            const imagesList = images.map((img, idx) => `
+            .then(response => response.json())
+            .then(data => {
+                const images = data.block?.data?.images || [];
+                const autoplay = data.block?.data?.autoplay !== false;
+                const interval = data.block?.data?.interval || 3000;
+
+                // Инициализируем массив изображений
+                sliderImages = [...images];
+
+                const imagesList = images.map((img, idx) => `
                 <div class="slider-image-item" data-index="${idx}">
                     <img src="${img}" alt="Slide ${idx + 1}" style="max-width: 150px; max-height: 100px; object-fit: cover; border-radius: 8px;">
                     <div class="slider-image-controls">
@@ -656,8 +668,8 @@ function openEditModal(blockId, blockType) {
                     </div>
                 </div>
             `).join('');
-            
-            modalBody.innerHTML = `
+
+                modalBody.innerHTML = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">🎠 Редактировать слайдер</h3>
                 <form id="slider-edit-form" enctype="multipart/form-data">
                     <div class="form-group">
@@ -698,28 +710,28 @@ function openEditModal(blockId, blockType) {
                     </div>
                 </form>
             `;
-            
-            // Обработка загрузки файлов
-            const fileInput = document.getElementById('slider-file-input');
-            if (fileInput) {
-                fileInput.addEventListener('change', function(e) {
-                    const files = Array.from(e.target.files);
-                    files.forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            addSliderImageToList(e.target.result);
-                        };
-                        reader.readAsDataURL(file);
+
+                // Обработка загрузки файлов
+                const fileInput = document.getElementById('slider-file-input');
+                if (fileInput) {
+                    fileInput.addEventListener('change', function (e) {
+                        const files = Array.from(e.target.files);
+                        files.forEach(file => {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                addSliderImageToList(e.target.result);
+                            };
+                            reader.readAsDataURL(file);
+                        });
                     });
-                });
-            }
-            
-            modal.classList.add('active');
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки данных блока:', error);
-            alert('Ошибка загрузки данных блока');
-        });
+                }
+
+                modal.classList.add('active');
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных блока:', error);
+                alert('Ошибка загрузки данных блока');
+            });
     } else if (blockType === 'button') {
         // Получаем информацию о блоке кнопки
         fetch(`/api/blocks/${blockId}/`, {
@@ -728,19 +740,19 @@ function openEditModal(blockId, blockType) {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            const buttonData = data.block?.data || {};
-            const text = buttonData.text || 'Кнопка';
-            const link = buttonData.link || '#';
-            const style = buttonData.style || 'primary';
-            const align = buttonData.align || 'left';
-            const bgColor = buttonData.bg_color || '';
-            const textColor = buttonData.text_color || '';
-            const size = buttonData.size || 'medium';
-            const borderRadius = buttonData.border_radius || '8px';
-            
-            modalBody.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                const buttonData = data.block?.data || {};
+                const text = buttonData.text || 'Кнопка';
+                const link = buttonData.link || '#';
+                const style = buttonData.style || 'primary';
+                const align = buttonData.align || 'left';
+                const bgColor = buttonData.bg_color || '';
+                const textColor = buttonData.text_color || '';
+                const size = buttonData.size || 'medium';
+                const borderRadius = buttonData.border_radius || '8px';
+
+                modalBody.innerHTML = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">🔘 Редактировать кнопку</h3>
                 <form id="button-edit-form">
                     <div class="form-group">
@@ -801,41 +813,41 @@ function openEditModal(blockId, blockType) {
                     </div>
                 </form>
             `;
-            
-            // Синхронизация color picker с текстовым полем
-            const bgColorInput = document.getElementById('button-bg-color-input');
-            const bgColorText = document.getElementById('button-bg-color-text');
-            const textColorInput = document.getElementById('button-text-color-input');
-            const textColorText = document.getElementById('button-text-color-text');
-            
-            if (bgColorInput && bgColorText) {
-                bgColorInput.addEventListener('input', (e) => {
-                    bgColorText.value = e.target.value;
-                });
-                bgColorText.addEventListener('input', (e) => {
-                    if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                        bgColorInput.value = e.target.value;
-                    }
-                });
-            }
-            
-            if (textColorInput && textColorText) {
-                textColorInput.addEventListener('input', (e) => {
-                    textColorText.value = e.target.value;
-                });
-                textColorText.addEventListener('input', (e) => {
-                    if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                        textColorInput.value = e.target.value;
-                    }
-                });
-            }
-            
-            modal.classList.add('active');
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки данных блока:', error);
-            alert('Ошибка загрузки данных блока');
-        });
+
+                // Синхронизация color picker с текстовым полем
+                const bgColorInput = document.getElementById('button-bg-color-input');
+                const bgColorText = document.getElementById('button-bg-color-text');
+                const textColorInput = document.getElementById('button-text-color-input');
+                const textColorText = document.getElementById('button-text-color-text');
+
+                if (bgColorInput && bgColorText) {
+                    bgColorInput.addEventListener('input', (e) => {
+                        bgColorText.value = e.target.value;
+                    });
+                    bgColorText.addEventListener('input', (e) => {
+                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                            bgColorInput.value = e.target.value;
+                        }
+                    });
+                }
+
+                if (textColorInput && textColorText) {
+                    textColorInput.addEventListener('input', (e) => {
+                        textColorText.value = e.target.value;
+                    });
+                    textColorText.addEventListener('input', (e) => {
+                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                            textColorInput.value = e.target.value;
+                        }
+                    });
+                }
+
+                modal.classList.add('active');
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных блока:', error);
+                alert('Ошибка загрузки данных блока');
+            });
     } else if (blockType === 'video') {
         // Получаем информацию о блоке видео
         fetch(`/api/blocks/${blockId}/`, {
@@ -844,15 +856,15 @@ function openEditModal(blockId, blockType) {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            const videoData = data.block?.data || {};
-            const url = videoData.url || '';
-            const width = videoData.width || '100%';
-            const height = videoData.height || '400px';
-            const autoplay = videoData.autoplay || false;
-            
-            modalBody.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                const videoData = data.block?.data || {};
+                const url = videoData.url || '';
+                const width = videoData.width || '100%';
+                const height = videoData.height || '400px';
+                const autoplay = videoData.autoplay || false;
+
+                modalBody.innerHTML = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">🎥 Редактировать видео</h3>
                 <form id="video-edit-form">
                     <div class="form-group">
@@ -879,13 +891,13 @@ function openEditModal(blockId, blockType) {
                     </div>
                 </form>
             `;
-            
-            modal.classList.add('active');
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки данных блока:', error);
-            alert('Ошибка загрузки данных блока');
-        });
+
+                modal.classList.add('active');
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных блока:', error);
+                alert('Ошибка загрузки данных блока');
+            });
     } else {
         alert('Редактирование этого типа блока будет доступно в следующей версии');
     }
@@ -909,12 +921,12 @@ function removeSliderImage(index) {
 function updateSliderImagesList() {
     const list = document.getElementById('slider-images-list');
     if (!list) return;
-    
+
     if (!sliderImages || sliderImages.length === 0) {
         list.innerHTML = '<p style="color: #6b7280; text-align: center; grid-column: 1/-1;">Нет изображений</p>';
         return;
     }
-    
+
     list.innerHTML = sliderImages.map((img, idx) => `
         <div class="slider-image-item" data-index="${idx}">
             <img src="${img}" alt="Slide ${idx + 1}" style="max-width: 150px; max-height: 100px; object-fit: cover; border-radius: 8px;">
@@ -936,17 +948,17 @@ function addSliderImageFromUrl() {
 async function saveSliderBlock(blockId) {
     const autoplayEl = document.getElementById('slider-autoplay');
     const intervalEl = document.getElementById('slider-interval');
-    
+
     if (!autoplayEl || !intervalEl) {
         alert('Ошибка: элементы формы не найдены');
         return;
     }
-    
+
     const autoplay = autoplayEl.checked;
     const interval = parseInt(intervalEl.value) || 3000;
-    
+
     if (!sliderImages) sliderImages = [];
-    
+
     await updateBlockData(blockId, {
         images: sliderImages,
         autoplay: autoplay,
@@ -979,7 +991,7 @@ function setImageSize(width, height) {
 function increaseImageSize() {
     const widthInput = document.getElementById('image-width-input');
     const heightInput = document.getElementById('image-height-input');
-    
+
     if (widthInput) {
         const currentWidth = widthInput.value;
         const newWidth = adjustSize(currentWidth, true);
@@ -987,7 +999,7 @@ function increaseImageSize() {
         // Триггерим событие input для обновления предпросмотра
         widthInput.dispatchEvent(new Event('input'));
     }
-    
+
     if (heightInput && heightInput.value !== 'auto') {
         const currentHeight = heightInput.value;
         const newHeight = adjustSize(currentHeight, true);
@@ -1000,7 +1012,7 @@ function increaseImageSize() {
 function decreaseImageSize() {
     const widthInput = document.getElementById('image-width-input');
     const heightInput = document.getElementById('image-height-input');
-    
+
     if (widthInput) {
         const currentWidth = widthInput.value;
         const newWidth = adjustSize(currentWidth, false);
@@ -1008,7 +1020,7 @@ function decreaseImageSize() {
         // Триггерим событие input для обновления предпросмотра
         widthInput.dispatchEvent(new Event('input'));
     }
-    
+
     if (heightInput && heightInput.value !== 'auto') {
         const currentHeight = heightInput.value;
         const newHeight = adjustSize(currentHeight, false);
@@ -1022,25 +1034,25 @@ function adjustSize(value, increase) {
     if (!value || value === 'auto') {
         return increase ? '150px' : '100px';
     }
-    
+
     // Парсим значение (может быть в px, %, или просто число)
     const match = value.match(/^(\d+\.?\d*)(px|%|em|rem)?$/);
     if (match) {
         let num = parseFloat(match[1]);
         const unit = match[2] || 'px';
-        
+
         // Для процентов изменяем на 10%, для пикселей на 50px
         const step = unit === '%' ? 10 : 50;
-        
+
         if (increase) {
             num = Math.min(num + step, unit === '%' ? 100 : 2000);
         } else {
             num = Math.max(num - step, unit === '%' ? 10 : 50);
         }
-        
+
         // Убираем десятичные знаки, если они не нужны
         num = num % 1 === 0 ? Math.floor(num) : Math.round(num * 10) / 10;
-        
+
         return num + unit;
     }
     // Если не удалось распарсить, возвращаем значение по умолчанию
@@ -1054,12 +1066,12 @@ async function saveImageBlock(blockId) {
     const altInput = document.getElementById('image-alt-input');
     const widthInput = document.getElementById('image-width-input');
     const heightInput = document.getElementById('image-height-input');
-    
+
     // Если выбрано изображение для загрузки
     if (fileInput && fileInput.files.length > 0) {
         const formData = new FormData();
         formData.append('image', fileInput.files[0]);
-        
+
         try {
             const response = await fetch(`/api/blocks/${blockId}/upload-image/`, {
                 method: 'POST',
@@ -1068,7 +1080,7 @@ async function saveImageBlock(blockId) {
                 },
                 body: formData
             });
-            
+
             const result = await response.json();
             if (result.success) {
                 // Обновляем данные блока (alt, url, width, height)
@@ -1108,7 +1120,7 @@ async function saveButtonBlock(blockId) {
     const bgColorText = document.getElementById('button-bg-color-text');
     const textColorText = document.getElementById('button-text-color-text');
     const borderRadiusInput = document.getElementById('button-border-radius-input');
-    
+
     const buttonData = {
         text: textInput.value || 'Кнопка',
         link: linkInput.value || '#',
@@ -1117,7 +1129,7 @@ async function saveButtonBlock(blockId) {
         style: styleInput.value || 'primary',
         border_radius: borderRadiusInput.value || '8px'
     };
-    
+
     // Добавляем кастомные цвета только если они заданы
     if (bgColorText && bgColorText.value.trim()) {
         buttonData.bg_color = bgColorText.value.trim();
@@ -1125,7 +1137,7 @@ async function saveButtonBlock(blockId) {
     if (textColorText && textColorText.value.trim()) {
         buttonData.text_color = textColorText.value.trim();
     }
-    
+
     await updateBlockData(blockId, buttonData);
     closeEditModal();
 }
@@ -1136,14 +1148,14 @@ async function saveVideoBlock(blockId) {
     const widthInput = document.getElementById('video-width-input');
     const heightInput = document.getElementById('video-height-input');
     const autoplayInput = document.getElementById('video-autoplay-input');
-    
+
     const videoData = {
         url: urlInput.value || '',
         width: widthInput.value || '100%',
         height: heightInput.value || '400px',
         autoplay: autoplayInput.checked || false
     };
-    
+
     await updateBlockData(blockId, videoData);
     closeEditModal();
 }
@@ -1153,13 +1165,13 @@ async function saveTextBlock(blockId) {
     const contentInput = document.getElementById('text-content-input');
     const sizeInput = document.getElementById('text-size-input');
     const alignInput = document.getElementById('text-align-input');
-    
+
     const textData = {
         content: contentInput.value || 'Текст блока',
         size: sizeInput.value || '16px',
         align: alignInput.value || 'left'
     };
-    
+
     await updateBlockData(blockId, textData);
     closeEditModal();
 }
@@ -1169,13 +1181,13 @@ async function saveHeadingBlock(blockId) {
     const contentInput = document.getElementById('heading-content-input');
     const levelInput = document.getElementById('heading-level-input');
     const alignInput = document.getElementById('heading-align-input');
-    
+
     const headingData = {
         content: contentInput.value || 'Заголовок',
         level: levelInput.value || 'h1',
         align: alignInput.value || 'left'
     };
-    
+
     await updateBlockData(blockId, headingData);
     closeEditModal();
 }
@@ -1205,14 +1217,14 @@ async function updateBlockData(blockId, newData, reload = true) {
                 if (blockItem) {
                     const blockType = blockItem.dataset.blockType;
                     let targetElement = null;
-                    
+
                     if (blockType === 'image') {
                         targetElement = blockItem.querySelector('.block-content img');
                     } else if (blockType === 'slider') {
-                        targetElement = blockItem.querySelector('.block-content .slider-container') || 
-                                     blockItem.querySelector('.block-content > div');
+                        targetElement = blockItem.querySelector('.block-content .slider-container') ||
+                            blockItem.querySelector('.block-content > div');
                     }
-                    
+
                     if (targetElement) {
                         if (newData.width) {
                             targetElement.style.width = newData.width;
@@ -1268,7 +1280,7 @@ function initBlockResizeHandles(blockItem) {
     const blockId = blockItem.dataset.blockId;
     const blockType = blockItem.dataset.blockType;
     const handles = blockItem.querySelectorAll('.block-resize-handle');
-    
+
     // Для изображения берем img, для слайдера - slider-container
     let targetElement = null;
     if (blockType === 'image') {
@@ -1281,20 +1293,20 @@ function initBlockResizeHandles(blockItem) {
             targetElement = blockItem.querySelector('.block-content > div');
         }
     }
-    
+
     if (!targetElement || handles.length === 0) {
         console.log('Не найден targetElement или handles для блока', blockId, blockType);
         return;
     }
-    
+
     // Проверяем, не инициализированы ли уже обработчики
     if (blockItem.dataset.resizeInitialized === 'true') return;
     blockItem.dataset.resizeInitialized = 'true';
-    
+
     let isResizing = false;
     let startX, startY, startWidth, startHeight;
     let currentData = null;
-    
+
     // Получаем текущие данные блока и устанавливаем начальный размер
     fetch(`/api/blocks/${blockId}/`, {
         method: 'GET',
@@ -1302,65 +1314,65 @@ function initBlockResizeHandles(blockItem) {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            currentData = data.block.data || {};
-            
-            // Устанавливаем начальный размер из данных
-            if (currentData.width) {
-                targetElement.style.width = currentData.width;
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentData = data.block.data || {};
+
+                // Устанавливаем начальный размер из данных
+                if (currentData.width) {
+                    targetElement.style.width = currentData.width;
+                }
+                if (currentData.height) {
+                    targetElement.style.height = currentData.height;
+                } else if (blockType === 'slider' && !currentData.height) {
+                    // Для слайдера по умолчанию auto
+                    targetElement.style.height = 'auto';
+                }
             }
-            if (currentData.height) {
-                targetElement.style.height = currentData.height;
-            } else if (blockType === 'slider' && !currentData.height) {
-                // Для слайдера по умолчанию auto
-                targetElement.style.height = 'auto';
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Ошибка загрузки данных блока:', error);
-    });
-    
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки данных блока:', error);
+        });
+
     handles.forEach(handle => {
-        handle.addEventListener('mousedown', function(e) {
+        handle.addEventListener('mousedown', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             isResizing = true;
             startX = e.clientX;
             startY = e.clientY;
-            
+
             // Получаем текущий размер элемента
             const computedStyle = window.getComputedStyle(targetElement);
             const widthValue = computedStyle.width;
             const heightValue = computedStyle.height;
-            
+
             // Парсим размеры, учитывая проценты и пиксели
             if (widthValue && widthValue !== 'auto' && widthValue !== '0px' && !widthValue.includes('%')) {
                 startWidth = parseFloat(widthValue);
             } else {
                 startWidth = targetElement.offsetWidth || 400;
             }
-            
+
             if (heightValue && heightValue !== 'auto' && heightValue !== '0px' && !heightValue.includes('%')) {
                 startHeight = parseFloat(heightValue);
             } else {
                 startHeight = targetElement.offsetHeight || 300;
             }
-            
+
             const handleType = handle.dataset.handle;
-            
+
             function handleBlockResize(e) {
                 if (!isResizing) return;
-                
+
                 const deltaX = e.clientX - startX;
                 const deltaY = e.clientY - startY;
-                
+
                 let newWidth = startWidth;
                 let newHeight = startHeight;
-                
+
                 // Определяем направление изменения размера
                 if (handleType.includes('e')) {
                     newWidth = startWidth + deltaX;
@@ -1374,37 +1386,37 @@ function initBlockResizeHandles(blockItem) {
                 if (handleType.includes('n')) {
                     newHeight = startHeight - deltaY;
                 }
-                
+
                 // Ограничения минимального размера
                 newWidth = Math.max(50, newWidth);
                 newHeight = Math.max(50, newHeight);
-                
+
                 // Применяем размеры к элементу
                 targetElement.style.width = newWidth + 'px';
                 targetElement.style.height = newHeight + 'px';
             }
-            
+
             function handleBlockResizeEnd() {
                 if (!isResizing) return;
-                
+
                 isResizing = false;
                 document.removeEventListener('mousemove', handleBlockResize);
                 document.removeEventListener('mouseup', handleBlockResizeEnd);
-                
+
                 // Получаем финальный размер
                 const finalWidth = targetElement.offsetWidth;
                 const finalHeight = targetElement.offsetHeight;
-                
+
                 // Обновляем данные блока через API
                 const newData = {
                     ...currentData,
                     width: finalWidth + 'px',
                     height: finalHeight + 'px'
                 };
-                
+
                 updateBlockData(blockId, newData, false); // false = не перезагружать страницу
             }
-            
+
             document.addEventListener('mousemove', handleBlockResize);
             document.addEventListener('mouseup', handleBlockResizeEnd);
         });
@@ -1415,39 +1427,39 @@ function initBlockResizeHandles(blockItem) {
 function changeSlide(sliderId, direction) {
     const container = document.getElementById(sliderId);
     if (!container) return;
-    
+
     const slides = container.querySelectorAll('.slide');
     if (slides.length === 0) return;
-    
+
     const currentSlide = container.querySelector('.slide.active');
     let currentIndex = Array.from(slides).indexOf(currentSlide);
-    
+
     currentIndex += direction;
     if (currentIndex < 0) currentIndex = slides.length - 1;
     if (currentIndex >= slides.length) currentIndex = 0;
-    
+
     goToSlide(sliderId, currentIndex);
 }
 
 function goToSlide(sliderId, index) {
     const container = document.getElementById(sliderId);
     if (!container) return;
-    
+
     const slides = container.querySelectorAll('.slide');
     const indicators = container.querySelectorAll('.slider-indicator');
-    
+
     if (index < 0 || index >= slides.length) return;
-    
+
     // Убираем активный класс
     slides.forEach(slide => slide.classList.remove('active'));
     indicators.forEach(indicator => indicator.classList.remove('active'));
-    
+
     // Добавляем активный класс
     slides[index].classList.add('active');
     if (indicators[index]) {
         indicators[index].classList.add('active');
     }
-    
+
     // Сбрасываем автопрокрутку
     if (container.sliderInterval) {
         clearInterval(container.sliderInterval);
@@ -1458,16 +1470,269 @@ function goToSlide(sliderId, index) {
 function startSlider(container) {
     const autoplay = container.dataset.autoplay === 'true';
     const interval = parseInt(container.dataset.interval) || 3000;
-    
+
     if (!autoplay) return;
-    
+
     container.sliderInterval = setInterval(() => {
         const slides = container.querySelectorAll('.slide');
         const currentSlide = container.querySelector('.slide.active');
         let currentIndex = Array.from(slides).indexOf(currentSlide);
-        
+
         currentIndex = (currentIndex + 1) % slides.length;
         goToSlide(container.id, currentIndex);
     }, interval);
 }
 
+// Инициализация обработчиков перетаскивания для блока
+function initBlockDragHandles(blockItem) {
+    // Проверяем, не инициализирован ли уже этот обработчик
+    if (blockItem.dataset.dragInitialized === 'true') {
+        return;
+    }
+    blockItem.dataset.dragInitialized = 'true';
+
+    const blockId = blockItem.dataset.blockId;
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+
+    blockItem.addEventListener('mousedown', function (e) {
+        // Не начинаем перетаскивание если клик на кнопку или ручку
+        if (e.target.closest('.block-controls') ||
+            e.target.closest('.block-resize-handle')) {
+            return;
+        }
+
+        // Проверяем что мы кликнули на сам блок, а не на его содержимое
+        if (e.target !== blockItem && e.target.closest('.block-content')) {
+            return;
+        }
+
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = blockItem.offsetLeft;
+        startTop = blockItem.offsetTop;
+
+        blockItem.classList.add('dragging');
+
+        const handleMouseMove = (moveEvent) => {
+            if (!isDragging) return;
+
+            const deltaX = moveEvent.clientX - startX;
+            const deltaY = moveEvent.clientY - startY;
+
+            blockItem.style.left = (startLeft + deltaX) + 'px';
+            blockItem.style.top = (startTop + deltaY) + 'px';
+        };
+
+        const handleMouseUp = async () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            blockItem.classList.remove('dragging');
+
+            // Сохраняем позицию на сервер
+            const finalLeft = blockItem.offsetLeft;
+            const finalTop = blockItem.offsetTop;
+
+            try {
+                const response = await fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const currentData = result.block.data || {};
+
+                    // Обновляем позицию
+                    const newData = {
+                        ...currentData,
+                        position_x: finalLeft,
+                        position_y: finalTop
+                    };
+
+                    await updateBlockData(blockId, newData, false);
+                }
+            } catch (error) {
+                console.error('Ошибка при сохранении позиции:', error);
+            }
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
+}
+
+// Инициализация обработчиков изменения размера для блока изображения или слайдера
+function initBlockResizeHandles(blockItem) {
+    const blockId = blockItem.dataset.blockId;
+    const blockType = blockItem.dataset.blockType;
+    const handles = blockItem.querySelectorAll('.block-resize-handle');
+
+    // Проверяем, не инициализированы ли уже обработчики
+    if (blockItem.dataset.resizeInitialized === 'true') {
+        console.log('ℹ️ Обработчики resize уже инициализированы для этого блока');
+        return;
+    }
+    blockItem.dataset.resizeInitialized = 'true';
+
+    console.log('🔧 Инициализация resize для блока:', { blockId, blockType, handlesCount: handles.length });
+
+    // Для изображения берем img, для слайдера - slider-container
+    let targetElement = null;
+    if (blockType === 'image') {
+        targetElement = blockItem.querySelector('.block-content img');
+    } else if (blockType === 'slider') {
+        // Для слайдера ищем контейнер слайдера
+        targetElement = blockItem.querySelector('.block-content .slider-container');
+        // Если не нашли, ищем первый div внутри block-content
+        if (!targetElement) {
+            targetElement = blockItem.querySelector('.block-content > div');
+        }
+    }
+
+    if (!targetElement || handles.length === 0) {
+        console.log('⚠️ Не найден targetElement или handles для блока', blockId, blockType);
+        return;
+    }
+
+    console.log('✓ Найден targetElement для resize');
+
+    // Получаем текущие данные блока и устанавливаем начальный размер
+    fetch(`/api/blocks/${blockId}/`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const currentData = data.block.data || {};
+
+                // Устанавливаем начальный размер из данных
+                if (currentData.width) {
+                    targetElement.style.width = currentData.width;
+                }
+                if (currentData.height) {
+                    targetElement.style.height = currentData.height;
+                } else if (blockType === 'slider' && !currentData.height) {
+                    // Для слайдера по умолчанию auto
+                    targetElement.style.height = 'auto';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки данных блока:', error);
+        });
+
+    // Создаем обработчик для каждой ручки
+    handles.forEach(handle => {
+        handle.addEventListener('mousedown', createResizeHandler(blockId, blockType, targetElement, handle));
+    });
+}
+
+// Функция для создания обработчика изменения размера
+function createResizeHandler(blockId, blockType, targetElement, handle) {
+    return function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const handleType = handle.dataset.handle;
+        let startX = e.clientX;
+        let startY = e.clientY;
+
+        // Получаем текущий размер элемента
+        const computedStyle = window.getComputedStyle(targetElement);
+        const widthValue = computedStyle.width;
+        const heightValue = computedStyle.height;
+
+        // Парсим размеры
+        let startWidth = targetElement.offsetWidth || 400;
+        let startHeight = targetElement.offsetHeight || 300;
+
+        // Добавляем класс для визуализации процесса изменения размера
+        handle.classList.add('resizing');
+        targetElement.style.transition = 'none';
+
+        // Функция обработки перемещения мыши
+        const handleMouseMove = (moveEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            const deltaY = moveEvent.clientY - startY;
+
+            let newWidth = startWidth;
+            let newHeight = startHeight;
+
+            // Определяем направление изменения размера в зависимости от типа ручки
+            if (handleType.includes('e')) {
+                newWidth = startWidth + deltaX;
+            }
+            if (handleType.includes('w')) {
+                newWidth = startWidth - deltaX;
+            }
+            if (handleType.includes('s')) {
+                newHeight = startHeight + deltaY;
+            }
+            if (handleType.includes('n')) {
+                newHeight = startHeight - deltaY;
+            }
+
+            // Ограничения минимального размера
+            newWidth = Math.max(50, newWidth);
+            newHeight = Math.max(50, newHeight);
+
+            // Применяем размеры к элементу
+            targetElement.style.width = newWidth + 'px';
+            targetElement.style.height = newHeight + 'px';
+        };
+
+        // Функция завершения изменения размера
+        const handleMouseUp = async () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+
+            handle.classList.remove('resizing');
+            targetElement.style.transition = '';
+
+            // Получаем финальный размер
+            const finalWidth = targetElement.offsetWidth;
+            const finalHeight = targetElement.offsetHeight;
+
+            // Получаем текущие данные блока
+            try {
+                const response = await fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const currentData = result.block.data || {};
+
+                    // Обновляем только размеры (width/height), остальное берём из currentData
+                    const newData = {
+                        ...currentData,
+                        width: finalWidth + 'px',
+                        height: finalHeight + 'px'
+                    };
+
+                    // Отправляем обновление на сервер
+                    updateBlockData(blockId, newData, false);
+                }
+            } catch (error) {
+                console.error('Ошибка при завершении изменения размера:', error);
+            }
+        };
+
+        // Добавляем обработчики
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+}
