@@ -45,6 +45,18 @@ body {
     margin: 0 auto;
 }
 
+/* Canvas allowing blocks to be absolutely positioned (saved from editor) */
+.site-canvas {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.site-canvas .block-item {
+    position: absolute;
+    box-sizing: border-box;
+}
+
 .block-item {
     margin-bottom: 2rem;
 }
@@ -301,4 +313,3 @@ video {
         line-height: 1.5;
     }
 }
-

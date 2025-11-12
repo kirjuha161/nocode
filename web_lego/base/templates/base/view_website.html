@@ -2,6 +2,7 @@
 {% load block_tags %}
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,41 +10,95 @@
     <link rel="stylesheet" href="{% static 'base/css/view_website.css' %}">
     <style>
         :root {
-            --font-family: {{ website.font_family|default:"Arial, sans-serif" }};
-            --background-color: {{ website.background_color|default:"#ffffff" }};
-            --text-color: {{ website.text_color|default:"#000000" }};
-            --header-background-color: {{ website.header_background_color|default:"#ffffff" }};
-            --header-text-color: {{ website.header_text_color|default:"#000000" }};
-            --footer-background-color: {{ website.footer_background_color|default:"#f3f4f6" }};
-            --footer-text-color: {{ website.footer_text_color|default:"#000000" }};
+            --font-family: {
+                    {
+                    website.font_family|default: "Arial, sans-serif"
+                }
+            }
+
+            ;
+
+            --background-color: {
+                    {
+                    website.background_color|default: "#ffffff"
+                }
+            }
+
+            ;
+
+            --text-color: {
+                    {
+                    website.text_color|default: "#000000"
+                }
+            }
+
+            ;
+
+            --header-background-color: {
+                    {
+                    website.header_background_color|default: "#ffffff"
+                }
+            }
+
+            ;
+
+            --header-text-color: {
+                    {
+                    website.header_text_color|default: "#000000"
+                }
+            }
+
+            ;
+
+            --footer-background-color: {
+                    {
+                    website.footer_background_color|default: "#f3f4f6"
+                }
+            }
+
+            ;
+
+            --footer-text-color: {
+                    {
+                    website.footer_text_color|default: "#000000"
+                }
+            }
+
+            ;
         }
     </style>
 </head>
+
 <body>
 
     {% if website.header_show %}
     <header class="header">
         <div class="header-content">
             {% if website.header_logo %}
-                <img src="{{ website.header_logo.url }}" alt="Logo" class="header-logo">
+            <img src="{{ website.header_logo.url }}" alt="Logo" class="header-logo">
             {% endif %}
             {% if website.header_company_name %}
-                <div class="header-company-name">{{ website.header_company_name }}</div>
+            <div class="header-company-name">{{ website.header_company_name }}</div>
             {% endif %}
         </div>
     </header>
     {% endif %}
 
     <main class="main-content">
-        {% for block in blocks %}
-            <div class="block-item">
+        <div class="site-canvas">
+            {% for block in blocks %}
+            {% with data=block.get_data %}
+            <div class="block-item" data-block-id="{{ block.id }}" data-block-type="{{ block.block_type }}"
+                style="position: absolute; {% if data.position_x is not None %}left:{{ data.position_x }}px;{% endif %} {% if data.position_y is not None %}top:{{ data.position_y }}px;{% endif %} {% if data.width %}width:{{ data.width }};{% endif %} {% if data.height %}height:{{ data.height }};{% endif %}">
                 {{ block|render_block }}
             </div>
-        {% empty %}
+            {% endwith %}
+            {% empty %}
             <div style="text-align: center; padding: 3rem; color: #6b7280;">
                 <p>На сайте пока нет контента.</p>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </main>
 
     {% if website.footer_show %}
@@ -56,4 +111,5 @@
 
     <script src="{% static 'base/js/view_website.js' %}"></script>
 </body>
+
 </html>

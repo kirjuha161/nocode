@@ -1,0 +1,39 @@
+[33m20008a9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: commit: почти маинкрат
+[33mf312c50[m HEAD@{1}: checkout: moving from 6afa3be227d9c8dfb7b98cbdbb3b1d178172a9ab to main
+[33m6afa3be[m HEAD@{2}: commit: почти
+[33me762e3c[m HEAD@{3}: commit: почти маинкрафт
+[33mf312c50[m HEAD@{4}: checkout: moving from main to f312c50
+[33mf312c50[m HEAD@{5}: pull: Fast-forward
+[33m4ad6ded[m HEAD@{6}: reset: moving to HEAD
+[33m4ad6ded[m HEAD@{7}: checkout: moving from main to main
+[33m4ad6ded[m HEAD@{8}: pull origin main: Fast-forward
+[33me2bdda7[m HEAD@{9}: checkout: moving from main to main
+[33me2bdda7[m HEAD@{10}: pull origin main: Fast-forward
+[33me3f71e2[m HEAD@{11}: reset: moving to e3f71e2
+[33me2bdda7[m HEAD@{12}: pull origin main: Fast-forward
+[33me3f71e2[m HEAD@{13}: checkout: moving from e3f71e228819623f045443bd7e49fa91f5d648e4 to main
+[33me3f71e2[m HEAD@{14}: checkout: moving from main to e3f71e2
+[33me3f71e2[m HEAD@{15}: reset: moving to HEAD
+[33me3f71e2[m HEAD@{16}: checkout: moving from main to main
+[33me3f71e2[m HEAD@{17}: checkout: moving from main to main
+[33me3f71e2[m HEAD@{18}: pull origin main: Fast-forward
+[33m040222c[m HEAD@{19}: reset: moving to HEAD
+[33m040222c[m HEAD@{20}: checkout: moving from main to main
+[33m040222c[m HEAD@{21}: checkout: moving from main to main
+[33m040222c[m HEAD@{22}: pull --tags origin main: Fast-forward
+[33mfdd088f[m HEAD@{23}: reset: moving to fdd088f
+[33mc4ee1ce[m HEAD@{24}: pull --tags origin main: Fast-forward
+[33mfdd088f[m HEAD@{25}: reset: moving to fdd088f
+[33mc4ee1ce[m HEAD@{26}: commit: post prinayl
+[33m2b3f1c9[m[33m ([m[1;31morigin/feature/css[m[33m)[m HEAD@{27}: merge test-feature-css: Fast-forward
+[33mfdd088f[m HEAD@{28}: checkout: moving from test-feature-css to main
+[33m2b3f1c9[m[33m ([m[1;31morigin/feature/css[m[33m)[m HEAD@{29}: checkout: moving from main to test-feature-css
+[33mfdd088f[m HEAD@{30}: checkout: moving from test-feature-css to main
+[33m2b3f1c9[m[33m ([m[1;31morigin/feature/css[m[33m)[m HEAD@{31}: merge feature/css: Fast-forward
+[33mfdd088f[m HEAD@{32}: checkout: moving from main to test-feature-css
+[33mfdd088f[m HEAD@{33}: checkout: moving from feature/css to main
+[33m2b3f1c9[m[33m ([m[1;31morigin/feature/css[m[33m)[m HEAD@{34}: checkout: moving from main to feature/css
+[33mfdd088f[m HEAD@{35}: reset: moving to HEAD
+[33mfdd088f[m HEAD@{36}: checkout: moving from main to main
+[33mfdd088f[m HEAD@{37}: commit: -kakashka
+[33m19ee770[m HEAD@{38}: commit (initial): first commit
