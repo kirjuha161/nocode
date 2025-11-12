@@ -6,6 +6,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Редактировать {{ website.title }} - Web Lego</title>
     <link rel="stylesheet" href="{% static 'base/css/edit_website.css' %}">
 </head>
@@ -63,6 +66,7 @@
                         <button type="button" class="block-btn" onclick="editBlock('{{ block.id }}')">✏️</button>
                         <button type="button" class="block-btn delete"
                             onclick="deleteBlock('{{ block.id }}')">🗑️</button>
+                        <!-- proportional toggle removed to restore previous stable template -->
                     </div>
                     <div class="block-resize-handle se" data-handle="se" title="Изменить размер"></div>
                     <div class="block-resize-handle sw" data-handle="sw" title="Изменить размер"></div>
@@ -215,7 +219,7 @@
             </div>
         </div>
     </div>
-    <script src="{% static 'base/js/edit_website.js' %}"></script>
+    <script src="{% static 'base/js/edit_website_v3.js' %}"></script>
 </body>
 
 </html>

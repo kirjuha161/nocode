@@ -102,12 +102,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 initBlockResizeHandles(item);
             }
 
-            // Инициализация обработчиков перемещения для всех блоков
+            // Инициализируем обработчики перемещения для всех блоков
             initBlockDragHandles(item);
         });
-    });
-
-    // Инициализация для существующих блоков изображения и слайдера при загрузке
+    });    // Инициализация для существующих блоков изображения и слайдера при загрузке
     document.querySelectorAll('.block-item[data-block-type="image"], .block-item[data-block-type="slider"]').forEach(item => {
         if (item.classList.contains('selected')) {
             initBlockResizeHandles(item);
@@ -1281,6 +1279,8 @@ function initBlockResizeHandles(blockItem) {
     const blockType = blockItem.dataset.blockType;
     const handles = blockItem.querySelectorAll('.block-resize-handle');
 
+    console.log('Инициализация ручек размера для блока:', { blockId, blockType, handlesCount: handles.length });
+
     // Для изображения берем img, для слайдера - slider-container
     let targetElement = null;
     if (blockType === 'image') {
@@ -1295,19 +1295,18 @@ function initBlockResizeHandles(blockItem) {
     }
 
     if (!targetElement || handles.length === 0) {
-        console.log('Не найден targetElement или handles для блока', blockId, blockType);
+        console.log('⚠️ Не найден targetElement или handles для блока', blockId, blockType);
         return;
     }
 
+    console.log('✓ Найден targetElement:', targetElement);
+
     // Проверяем, не инициализированы ли уже обработчики
-    if (blockItem.dataset.resizeInitialized === 'true') return;
-    blockItem.dataset.resizeInitialized = 'true';
-
-    let isResizing = false;
-    let startX, startY, startWidth, startHeight;
-    let currentData = null;
-
-    // Получаем текущие данные блока и устанавливаем начальный размер
+    if (blockItem.dataset.resizeInitialized === 'true') {
+        console.log('ℹ️ Обработчики уже инициализированы для этого блока');
+        return;
+    }
+    blockItem.dataset.resizeInitialized = 'true';    // Получаем текущие данные блока и устанавливаем начальный размер
     fetch(`/api/blocks/${blockId}/`, {
         method: 'GET',
         headers: {
@@ -1317,7 +1316,7 @@ function initBlockResizeHandles(blockItem) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                currentData = data.block.data || {};
+                const currentData = data.block.data || {};
 
                 // Устанавливаем начальный размер из данных
                 if (currentData.width) {
@@ -1335,92 +1334,185 @@ function initBlockResizeHandles(blockItem) {
             console.error('Ошибка загрузки данных блока:', error);
         });
 
+    // Создаем обработчик для каждой ручки
     handles.forEach(handle => {
-        handle.addEventListener('mousedown', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            isResizing = true;
-            startX = e.clientX;
-            startY = e.clientY;
-
-            // Получаем текущий размер элемента
-            const computedStyle = window.getComputedStyle(targetElement);
-            const widthValue = computedStyle.width;
-            const heightValue = computedStyle.height;
-
-            // Парсим размеры, учитывая проценты и пиксели
-            if (widthValue && widthValue !== 'auto' && widthValue !== '0px' && !widthValue.includes('%')) {
-                startWidth = parseFloat(widthValue);
-            } else {
-                startWidth = targetElement.offsetWidth || 400;
-            }
-
-            if (heightValue && heightValue !== 'auto' && heightValue !== '0px' && !heightValue.includes('%')) {
-                startHeight = parseFloat(heightValue);
-            } else {
-                startHeight = targetElement.offsetHeight || 300;
-            }
-
-            const handleType = handle.dataset.handle;
-
-            function handleBlockResize(e) {
-                if (!isResizing) return;
-
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-
-                let newWidth = startWidth;
-                let newHeight = startHeight;
-
-                // Определяем направление изменения размера
-                if (handleType.includes('e')) {
-                    newWidth = startWidth + deltaX;
-                }
-                if (handleType.includes('w')) {
-                    newWidth = startWidth - deltaX;
-                }
-                if (handleType.includes('s')) {
-                    newHeight = startHeight + deltaY;
-                }
-                if (handleType.includes('n')) {
-                    newHeight = startHeight - deltaY;
-                }
-
-                // Ограничения минимального размера
-                newWidth = Math.max(50, newWidth);
-                newHeight = Math.max(50, newHeight);
-
-                // Применяем размеры к элементу
-                targetElement.style.width = newWidth + 'px';
-                targetElement.style.height = newHeight + 'px';
-            }
-
-            function handleBlockResizeEnd() {
-                if (!isResizing) return;
-
-                isResizing = false;
-                document.removeEventListener('mousemove', handleBlockResize);
-                document.removeEventListener('mouseup', handleBlockResizeEnd);
-
-                // Получаем финальный размер
-                const finalWidth = targetElement.offsetWidth;
-                const finalHeight = targetElement.offsetHeight;
-
-                // Обновляем данные блока через API
-                const newData = {
-                    ...currentData,
-                    width: finalWidth + 'px',
-                    height: finalHeight + 'px'
-                };
-
-                updateBlockData(blockId, newData, false); // false = не перезагружать страницу
-            }
-
-            document.addEventListener('mousemove', handleBlockResize);
-            document.addEventListener('mouseup', handleBlockResizeEnd);
-        });
+        handle.addEventListener('mousedown', createResizeHandler(blockId, blockType, targetElement, handle));
     });
+}
+
+// Инициализация обработчиков перемещения блоков (drag)
+function initBlockDragHandles(blockItem) {
+    const blockId = blockItem.dataset.blockId;
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+
+    blockItem.addEventListener('mousedown', function (e) {
+        // Не начинаем перетаскивание если клик на кнопку, ручку или контент
+        if (e.target.closest('.block-controls') ||
+            e.target.closest('.block-resize-handle') ||
+            e.target.closest('.block-content')) {
+            return;
+        }
+
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = blockItem.offsetLeft;
+        startTop = blockItem.offsetTop;
+
+        blockItem.classList.add('dragging');
+
+        const handleMouseMove = (moveEvent) => {
+            if (!isDragging) return;
+
+            const deltaX = moveEvent.clientX - startX;
+            const deltaY = moveEvent.clientY - startY;
+
+            blockItem.style.left = (startLeft + deltaX) + 'px';
+            blockItem.style.top = (startTop + deltaY) + 'px';
+        };
+
+        const handleMouseUp = async () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            blockItem.classList.remove('dragging');
+
+            // Сохраняем позицию на сервер
+            const finalLeft = blockItem.offsetLeft;
+            const finalTop = blockItem.offsetTop;
+
+            try {
+                const response = await fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const currentData = result.block.data || {};
+
+                    // Обновляем позицию
+                    const newData = {
+                        ...currentData,
+                        position_x: finalLeft,
+                        position_y: finalTop
+                    };
+
+                    await updateBlockData(blockId, newData, false);
+                }
+            } catch (error) {
+                console.error('Ошибка при сохранении позиции:', error);
+            }
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
+}
+
+// Функция для создания обработчика изменения размера
+function createResizeHandler(blockId, blockType, targetElement, handle) {
+    return function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const handleType = handle.dataset.handle;
+        let startX = e.clientX;
+        let startY = e.clientY;
+
+        // Получаем текущий размер элемента
+        const computedStyle = window.getComputedStyle(targetElement);
+        const widthValue = computedStyle.width;
+        const heightValue = computedStyle.height;
+
+        // Парсим размеры
+        let startWidth = targetElement.offsetWidth || 400;
+        let startHeight = targetElement.offsetHeight || 300;
+
+        // Добавляем класс для визуализации процесса изменения размера
+        handle.classList.add('resizing');
+        targetElement.style.transition = 'none';
+
+        // Функция обработки перемещения мыши
+        const handleMouseMove = (moveEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            const deltaY = moveEvent.clientY - startY;
+
+            let newWidth = startWidth;
+            let newHeight = startHeight;
+
+            // Определяем направление изменения размера в зависимости от типа ручки
+            if (handleType.includes('e')) {
+                newWidth = startWidth + deltaX;
+            }
+            if (handleType.includes('w')) {
+                newWidth = startWidth - deltaX;
+            }
+            if (handleType.includes('s')) {
+                newHeight = startHeight + deltaY;
+            }
+            if (handleType.includes('n')) {
+                newHeight = startHeight - deltaY;
+            }
+
+            // Ограничения минимального размера
+            newWidth = Math.max(50, newWidth);
+            newHeight = Math.max(50, newHeight);
+
+            // Применяем размеры к элементу
+            targetElement.style.width = newWidth + 'px';
+            targetElement.style.height = newHeight + 'px';
+        };
+
+        // Функция завершения изменения размера
+        const handleMouseUp = async () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+
+            handle.classList.remove('resizing');
+            targetElement.style.transition = '';
+
+            // Получаем финальный размер
+            const finalWidth = targetElement.offsetWidth;
+            const finalHeight = targetElement.offsetHeight;
+
+            // Получаем текущие данные блока
+            try {
+                const response = await fetch(`/api/blocks/${blockId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const currentData = result.block.data || {};
+
+                    // Обновляем только размеры (width/height), остальное берём из currentData
+                    const newData = {
+                        ...currentData,
+                        width: finalWidth + 'px',
+                        height: finalHeight + 'px'
+                    };
+
+                    // Отправляем обновление на сервер
+                    updateBlockData(blockId, newData, false);
+                }
+            } catch (error) {
+                console.error('Ошибка при завершении изменения размера:', error);
+            }
+        };
+
+        // Добавляем обработчики
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
 }
 
 // Функции для управления слайдером в редакторе
