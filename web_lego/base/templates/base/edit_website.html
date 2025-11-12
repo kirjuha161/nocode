@@ -2,12 +2,17 @@
 {% load block_tags %}
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Редактировать {{ website.title }} - Web Lego</title>
     <link rel="stylesheet" href="{% static 'base/css/edit_website.css' %}">
 </head>
+
 <body data-website-id="{% if website.id %}{{ website.id }}{% else %}null{% endif %}">
     <!-- Header -->
     <header class="header">
@@ -52,33 +57,36 @@
         <div class="editor-area">
             <div class="editor-canvas" id="editor-canvas">
                 {% if blocks %}
-                    {% for block in blocks %}
-                        <div class="block-item" data-block-id="{{ block.id }}" data-block-type="{{ block.block_type }}" draggable="true">
-                            <div class="block-controls">
-                                <button type="button" class="block-btn" onclick="editBlock('{{ block.id }}')">✏️</button>
-                                <button type="button" class="block-btn delete" onclick="deleteBlock('{{ block.id }}')">🗑️</button>
-                            </div>
-                            {% if block.block_type == 'image' or block.block_type == 'slider' %}
-                            <div class="block-resize-handle se" data-handle="se"></div>
-                            <div class="block-resize-handle sw" data-handle="sw"></div>
-                            <div class="block-resize-handle ne" data-handle="ne"></div>
-                            <div class="block-resize-handle nw" data-handle="nw"></div>
-                            <div class="block-resize-handle e" data-handle="e"></div>
-                            <div class="block-resize-handle w" data-handle="w"></div>
-                            <div class="block-resize-handle n" data-handle="n"></div>
-                            <div class="block-resize-handle s" data-handle="s"></div>
-                            {% endif %}
-                            <div class="block-content">
-                                {{ block|render_block }}
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        <p>Перетащите блоки сюда, чтобы начать создавать лендинг</p>
+                {% for block in blocks %}
+                {% with data=block.get_data %}
+                <div class="block-item" data-block-id="{{ block.id }}" data-block-type="{{ block.block_type }}"
+                    draggable="true"
+                    style="position: absolute; {% if data.position_x is not None %}left:{{ data.position_x }}px;{% endif %} {% if data.position_y is not None %}top:{{ data.position_y }}px;{% endif %}">
+                    <div class="block-controls">
+                        <button type="button" class="block-btn" onclick="editBlock('{{ block.id }}')">✏️</button>
+                        <button type="button" class="block-btn delete"
+                            onclick="deleteBlock('{{ block.id }}')">🗑️</button>
+                        <!-- proportional toggle removed to restore previous stable template -->
                     </div>
+                    <div class="block-resize-handle se" data-handle="se" title="Изменить размер"></div>
+                    <div class="block-resize-handle sw" data-handle="sw" title="Изменить размер"></div>
+                    <div class="block-resize-handle ne" data-handle="ne" title="Изменить размер"></div>
+                    <div class="block-resize-handle nw" data-handle="nw" title="Изменить размер"></div>
+                    <div class="block-resize-handle e" data-handle="e" title="Изменить размер"></div>
+                    <div class="block-resize-handle w" data-handle="w" title="Изменить размер"></div>
+                    <div class="block-resize-handle n" data-handle="n" title="Изменить размер"></div>
+                    <div class="block-resize-handle s" data-handle="s" title="Изменить размер"></div>
+                    <div class="block-content">
+                        {{ block|render_block }}
+                    </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>Перетащите блоки сюда, чтобы начать создавать лендинг</p>
+                </div>
                 {% endif %}
-                <div class="drop-zone" id="drop-zone">Перетащите блок сюда</div>
             </div>
         </div>
 
@@ -87,7 +95,7 @@
             <h3>⚙️ Настройки</h3>
             <form id="settings-form" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                
+
                 <div class="form-group">
                     <label class="form-label">Название сайта</label>
                     <input type="text" name="title" class="form-input" value="{{ website.title }}">
@@ -96,8 +104,10 @@
                 <div class="form-group">
                     <label class="form-label">Цвет фона</label>
                     <div class="color-input">
-                        <input type="color" name="background_color" value="{{ website.background_color|default:'#ffffff' }}">
-                        <input type="text" class="form-input" value="{{ website.background_color|default:'#ffffff' }}" readonly>
+                        <input type="color" name="background_color"
+                            value="{{ website.background_color|default:'#ffffff' }}">
+                        <input type="text" class="form-input" value="{{ website.background_color|default:'#ffffff' }}"
+                            readonly>
                     </div>
                 </div>
 
@@ -105,38 +115,44 @@
                     <label class="form-label">Цвет текста</label>
                     <div class="color-input">
                         <input type="color" name="text_color" value="{{ website.text_color|default:'#000000' }}">
-                        <input type="text" class="form-input" value="{{ website.text_color|default:'#000000' }}" readonly>
+                        <input type="text" class="form-input" value="{{ website.text_color|default:'#000000' }}"
+                            readonly>
                     </div>
                 </div>
 
                 <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #7c3aed;">Header</h4>
-                
+
                 <div class="form-group">
                     <label class="form-label">Название компании</label>
-                    <input type="text" name="header_company_name" class="form-input" value="{{ website.header_company_name }}">
+                    <input type="text" name="header_company_name" class="form-input"
+                        value="{{ website.header_company_name }}">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Логотип</label>
                     <input type="file" name="header_logo" class="form-input" accept="image/*">
                     {% if website.header_logo %}
-                        <img src="{{ website.header_logo.url }}" alt="Logo" style="max-width: 100px; margin-top: 0.5rem;">
+                    <img src="{{ website.header_logo.url }}" alt="Logo" style="max-width: 100px; margin-top: 0.5rem;">
                     {% endif %}
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Цвет фона Header</label>
                     <div class="color-input">
-                        <input type="color" name="header_background_color" value="{{ website.header_background_color|default:'#ffffff' }}">
-                        <input type="text" class="form-input" value="{{ website.header_background_color|default:'#ffffff' }}" readonly>
+                        <input type="color" name="header_background_color"
+                            value="{{ website.header_background_color|default:'#ffffff' }}">
+                        <input type="text" class="form-input"
+                            value="{{ website.header_background_color|default:'#ffffff' }}" readonly>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Цвет текста Header</label>
                     <div class="color-input">
-                        <input type="color" name="header_text_color" value="{{ website.header_text_color|default:'#000000' }}">
-                        <input type="text" class="form-input" value="{{ website.header_text_color|default:'#000000' }}" readonly>
+                        <input type="color" name="header_text_color"
+                            value="{{ website.header_text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.header_text_color|default:'#000000' }}"
+                            readonly>
                     </div>
                 </div>
 
@@ -157,16 +173,20 @@
                 <div class="form-group">
                     <label class="form-label">Цвет фона Footer</label>
                     <div class="color-input">
-                        <input type="color" name="footer_background_color" value="{{ website.footer_background_color|default:'#f3f4f6' }}">
-                        <input type="text" class="form-input" value="{{ website.footer_background_color|default:'#f3f4f6' }}" readonly>
+                        <input type="color" name="footer_background_color"
+                            value="{{ website.footer_background_color|default:'#f3f4f6' }}">
+                        <input type="text" class="form-input"
+                            value="{{ website.footer_background_color|default:'#f3f4f6' }}" readonly>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Цвет текста Footer</label>
                     <div class="color-input">
-                        <input type="color" name="footer_text_color" value="{{ website.footer_text_color|default:'#000000' }}">
-                        <input type="text" class="form-input" value="{{ website.footer_text_color|default:'#000000' }}" readonly>
+                        <input type="color" name="footer_text_color"
+                            value="{{ website.footer_text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.footer_text_color|default:'#000000' }}"
+                            readonly>
                     </div>
                 </div>
 
@@ -199,6 +219,7 @@
             </div>
         </div>
     </div>
-    <script src="{% static 'base/js/edit_website.js' %}"></script>
+    <script src="{% static 'base/js/edit_website_v3.js' %}"></script>
 </body>
+
 </html>

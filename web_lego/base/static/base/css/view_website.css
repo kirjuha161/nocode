@@ -45,6 +45,19 @@ body {
     margin: 0 auto;
 }
 
+/* Canvas для абсолютного позиционирования блоков (сохранённые позиции/размеры) */
+.site-canvas {
+    position: relative;
+    width: 100%;
+    min-height: 800px;
+    /* можно скорректировать под контент */
+}
+
+.site-canvas .block-item {
+    position: absolute;
+    box-sizing: border-box;
+}
+
 .block-item {
     margin-bottom: 2rem;
 }
@@ -301,4 +314,3 @@ video {
         line-height: 1.5;
     }
 }
-
