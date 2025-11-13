@@ -53,6 +53,8 @@ def create_website(request):
     if request.method == 'POST':
         website = Website.objects.create(
             title=request.POST.get('title', 'Мой сайт'),
+            description=request.POST.get('description', ''),
+            font_family=request.POST.get('font_family', 'Arial, sans-serif'),
             owner=request.user
         )
         return redirect('edit_website', website_id=website.id)

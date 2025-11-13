@@ -28,16 +28,32 @@ def render_block(block):
         level = data.get("level", "h1")
         content = data.get("content", "Заголовок")
         align = data.get("align", "left")
+        font_family = data.get("font_family", "")
+        
+        heading_styles = [f"text-align: {align};"]
+        if font_family:
+            heading_styles.append(f"font-family: {font_family};")
+        if style_attr:
+            heading_styles.append(style_attr)
+        
         return mark_safe(
-            f'<{level} style="text-align: {align}; {style_attr}">{content}</{level}>'
+            f'<{level} style="{" ".join(heading_styles)}">{content}</{level}>'
         )
 
     elif block_type == "text":
         content = data.get("content", "Текст блока")
         size = data.get("size", "16px")
         align = data.get("align", "left")
+        font_family = data.get("font_family", "")
+        
+        text_styles = [f"font-size: {size};", f"text-align: {align};"]
+        if font_family:
+            text_styles.append(f"font-family: {font_family};")
+        if style_attr:
+            text_styles.append(style_attr)
+        
         return mark_safe(
-            f'<p style="font-size: {size}; text-align: {align}; {style_attr}">{content}</p>'
+            f'<p style="{" ".join(text_styles)}">{content}</p>'
         )
 
     elif block_type == "image":
@@ -49,17 +65,22 @@ def render_block(block):
             image_url = data.get("url", "")
 
         alt = data.get("alt", "Изображение")
-        width = data.get("width", "100%")
-        height = data.get("height", "auto")
-        # Если сохранены числовые значения — добавляем px
-        if isinstance(width, (int, float)):
-            width = f"{width}px"
-        if isinstance(height, (int, float)):
-            height = f"{height}px"
+        fit = data.get("fit", "contain")
+        
+        # Для изображений не задаем фиксированные размеры в inline стилях
+        # Размеры управляются контейнером блока через CSS
+        # Используем object-fit для правильного отображения
+        img_styles = []
+        img_styles.append(f"object-fit: {fit};")
+        img_styles.append("width: 100%;")
+        img_styles.append("height: 100%;")
+        img_styles.append("display: block;")
+        if style_attr:
+            img_styles.append(style_attr)
 
         if image_url:
             return mark_safe(
-                f'<img src="{image_url}" alt="{alt}" style="width: {width}; height: {height}; {style_attr}" />'
+                f'<img src="{image_url}" alt="{alt}" style="{" ".join(img_styles)}" />'
             )
         else:
             return mark_safe(

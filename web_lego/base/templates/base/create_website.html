@@ -41,6 +41,34 @@
                                   rows="3">{{ request.POST.description }}</textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="font_family" class="form-label">Шрифт</label>
+                        <select id="font_family" name="font_family" class="form-input">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                            <option value="Impact, sans-serif">Impact</option>
+                            <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                            <option value="'Lucida Console', monospace">Lucida Console</option>
+                            <option value="Tahoma, sans-serif">Tahoma</option>
+                            <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                            <option value="'Roboto', sans-serif">Roboto</option>
+                            <option value="'Open Sans', sans-serif">Open Sans</option>
+                            <option value="'Lato', sans-serif">Lato</option>
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Playfair Display', serif">Playfair Display</option>
+                            <option value="'Oswald', sans-serif">Oswald</option>
+                            <option value="'Raleway', sans-serif">Raleway</option>
+                            <option value="'Poppins', sans-serif">Poppins</option>
+                        </select>
+                        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">
+                            💡 Google Fonts будут автоматически подключены при выборе
+                        </p>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn">
                             🚀 Создать сайт

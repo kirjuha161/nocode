@@ -19,7 +19,6 @@
         <nav class="nav">
             <a href="{% url 'dashboard' %}" class="logo">Web Lego</a>
             <div class="nav-links">
-                <button class="nav-link preview-btn" onclick="openPreview()">👁️ Предпросмотр</button>
                 <a href="{% url 'view_website' website.id %}" target="_blank" class="nav-link">🌐 Открыть сайт</a>
                 <a href="{% url 'dashboard' %}" class="nav-link">← Назад</a>
             </div>
@@ -120,6 +119,31 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">Шрифт</label>
+                    <select name="font_family" class="form-input">
+                        <option value="Arial, sans-serif" {% if website.font_family == "Arial, sans-serif" %}selected{% endif %}>Arial</option>
+                        <option value="'Times New Roman', serif" {% if website.font_family == "'Times New Roman', serif" %}selected{% endif %}>Times New Roman</option>
+                        <option value="'Courier New', monospace" {% if website.font_family == "'Courier New', monospace" %}selected{% endif %}>Courier New</option>
+                        <option value="Georgia, serif" {% if website.font_family == "Georgia, serif" %}selected{% endif %}>Georgia</option>
+                        <option value="Verdana, sans-serif" {% if website.font_family == "Verdana, sans-serif" %}selected{% endif %}>Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif" {% if website.font_family == "'Trebuchet MS', sans-serif" %}selected{% endif %}>Trebuchet MS</option>
+                        <option value="Impact, sans-serif" {% if website.font_family == "Impact, sans-serif" %}selected{% endif %}>Impact</option>
+                        <option value="'Comic Sans MS', cursive" {% if website.font_family == "'Comic Sans MS', cursive" %}selected{% endif %}>Comic Sans MS</option>
+                        <option value="'Lucida Console', monospace" {% if website.font_family == "'Lucida Console', monospace" %}selected{% endif %}>Lucida Console</option>
+                        <option value="Tahoma, sans-serif" {% if website.font_family == "Tahoma, sans-serif" %}selected{% endif %}>Tahoma</option>
+                        <option value="'Segoe UI', sans-serif" {% if website.font_family == "'Segoe UI', sans-serif" %}selected{% endif %}>Segoe UI</option>
+                        <option value="'Roboto', sans-serif" {% if website.font_family == "'Roboto', sans-serif" %}selected{% endif %}>Roboto</option>
+                        <option value="'Open Sans', sans-serif" {% if website.font_family == "'Open Sans', sans-serif" %}selected{% endif %}>Open Sans</option>
+                        <option value="'Lato', sans-serif" {% if website.font_family == "'Lato', sans-serif" %}selected{% endif %}>Lato</option>
+                        <option value="'Montserrat', sans-serif" {% if website.font_family == "'Montserrat', sans-serif" %}selected{% endif %}>Montserrat</option>
+                        <option value="'Playfair Display', serif" {% if website.font_family == "'Playfair Display', serif" %}selected{% endif %}>Playfair Display</option>
+                        <option value="'Oswald', sans-serif" {% if website.font_family == "'Oswald', sans-serif" %}selected{% endif %}>Oswald</option>
+                        <option value="'Raleway', sans-serif" {% if website.font_family == "'Raleway', sans-serif" %}selected{% endif %}>Raleway</option>
+                        <option value="'Poppins', sans-serif" {% if website.font_family == "'Poppins', sans-serif" %}selected{% endif %}>Poppins</option>
+                    </select>
+                </div>
+
                 <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #7c3aed;">Header</h4>
 
                 <div class="form-group">
@@ -199,14 +223,6 @@
 
                 <button type="submit" class="btn">💾 Сохранить настройки</button>
             </form>
-        </div>
-    </div>
-
-    <!-- Модальное окно предпросмотра -->
-    <div class="preview-modal" id="preview-modal">
-        <div class="preview-content">
-            <button class="preview-close" onclick="closePreview()">×</button>
-            <iframe src="{% url 'view_website' website.id %}" style="width: 100%; height: 80vh; border: none;"></iframe>
         </div>
     </div>
 

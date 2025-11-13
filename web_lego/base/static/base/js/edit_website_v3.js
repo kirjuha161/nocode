@@ -99,10 +99,17 @@ function loadBlockPositions() {
                 if (blockData.fit) {
                     item.dataset.fit = blockData.fit;
                 } else {
-                    item.dataset.fit = 'contain';
+                    // По умолчанию для изображений - contain
+                    if (item.dataset.blockType === 'image' || item.dataset.blockType === 'video') {
+                        item.dataset.fit = 'contain';
+                    }
                 }
                 // Подгоняем внутренние медиа-элементы под новый размер
-                try { adjustInnerForMedia(item); } catch (e) { console.warn('adjustInnerForMedia load error', e); }
+                try { 
+                    adjustInnerForMedia(item); 
+                } catch (e) { 
+                    console.warn('adjustInnerForMedia load error', e); 
+                }
                 console.log('✓ Позиция загружена для блока', blockId, {
                     left: item.style.left,
                     top: item.style.top,
@@ -476,8 +483,6 @@ function initResizeHandles(blockItem) {
 
                 blockItem.style.width = newWidth + 'px';
                 blockItem.style.height = newHeight + 'px';
-                // Показать бейдж с размерами
-                showSizeBadge(blockItem, newWidth, newHeight);
                 blockItem.style.left = newLeft + 'px';
                 blockItem.style.top = newTop + 'px';
 
@@ -488,6 +493,9 @@ function initResizeHandles(blockItem) {
                     // не критично, просто выводим лог
                     console.warn('adjustInnerForMedia error', err);
                 }
+                
+                // Показать бейдж с размерами после обновления
+                showSizeBadge(blockItem, newWidth, newHeight);
 
                 // Периодическое логирование (каждые 200ms)
                 if (!blockItem.dataset.lastLogTime || Date.now() - blockItem.dataset.lastLogTime > 200) {
@@ -547,6 +555,7 @@ function openEditModal(blockId, blockType) {
                 const content = blockData.content || 'Текст блока';
                 const size = blockData.size || '16px';
                 const align = blockData.align || 'left';
+                const fontFamily = blockData.font_family || '';
 
                 html = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">📄 Редактировать текст</h3>
@@ -558,6 +567,30 @@ function openEditModal(blockId, blockType) {
                     <div class="form-group">
                         <label class="form-label">Размер шрифта</label>
                         <input type="text" id="field-size" class="form-input" value="${size}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Шрифт</label>
+                        <select id="field-font-family" class="form-input">
+                            <option value="">По умолчанию (шрифт сайта)</option>
+                            <option value="Arial, sans-serif" ${fontFamily === 'Arial, sans-serif' ? 'selected' : ''}>Arial</option>
+                            <option value="'Times New Roman', serif" ${fontFamily === "'Times New Roman', serif" ? 'selected' : ''}>Times New Roman</option>
+                            <option value="'Courier New', monospace" ${fontFamily === "'Courier New', monospace" ? 'selected' : ''}>Courier New</option>
+                            <option value="Georgia, serif" ${fontFamily === 'Georgia, serif' ? 'selected' : ''}>Georgia</option>
+                            <option value="Verdana, sans-serif" ${fontFamily === 'Verdana, sans-serif' ? 'selected' : ''}>Verdana</option>
+                            <option value="'Trebuchet MS', sans-serif" ${fontFamily === "'Trebuchet MS', sans-serif" ? 'selected' : ''}>Trebuchet MS</option>
+                            <option value="Impact, sans-serif" ${fontFamily === 'Impact, sans-serif' ? 'selected' : ''}>Impact</option>
+                            <option value="'Comic Sans MS', cursive" ${fontFamily === "'Comic Sans MS', cursive" ? 'selected' : ''}>Comic Sans MS</option>
+                            <option value="Tahoma, sans-serif" ${fontFamily === 'Tahoma, sans-serif' ? 'selected' : ''}>Tahoma</option>
+                            <option value="'Segoe UI', sans-serif" ${fontFamily === "'Segoe UI', sans-serif" ? 'selected' : ''}>Segoe UI</option>
+                            <option value="'Roboto', sans-serif" ${fontFamily === "'Roboto', sans-serif" ? 'selected' : ''}>Roboto</option>
+                            <option value="'Open Sans', sans-serif" ${fontFamily === "'Open Sans', sans-serif" ? 'selected' : ''}>Open Sans</option>
+                            <option value="'Lato', sans-serif" ${fontFamily === "'Lato', sans-serif" ? 'selected' : ''}>Lato</option>
+                            <option value="'Montserrat', sans-serif" ${fontFamily === "'Montserrat', sans-serif" ? 'selected' : ''}>Montserrat</option>
+                            <option value="'Playfair Display', serif" ${fontFamily === "'Playfair Display', serif" ? 'selected' : ''}>Playfair Display</option>
+                            <option value="'Oswald', sans-serif" ${fontFamily === "'Oswald', sans-serif" ? 'selected' : ''}>Oswald</option>
+                            <option value="'Raleway', sans-serif" ${fontFamily === "'Raleway', sans-serif" ? 'selected' : ''}>Raleway</option>
+                            <option value="'Poppins', sans-serif" ${fontFamily === "'Poppins', sans-serif" ? 'selected' : ''}>Poppins</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Выравнивание</label>
@@ -573,6 +606,7 @@ function openEditModal(blockId, blockType) {
                 const content = blockData.content || 'Заголовок';
                 const level = blockData.level || 'h1';
                 const align = blockData.align || 'left';
+                const fontFamily = blockData.font_family || '';
 
                 html = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">📝 Редактировать заголовок</h3>
@@ -593,6 +627,30 @@ function openEditModal(blockId, blockType) {
                         </select>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Шрифт</label>
+                        <select id="field-font-family" class="form-input">
+                            <option value="">По умолчанию (шрифт сайта)</option>
+                            <option value="Arial, sans-serif" ${fontFamily === 'Arial, sans-serif' ? 'selected' : ''}>Arial</option>
+                            <option value="'Times New Roman', serif" ${fontFamily === "'Times New Roman', serif" ? 'selected' : ''}>Times New Roman</option>
+                            <option value="'Courier New', monospace" ${fontFamily === "'Courier New', monospace" ? 'selected' : ''}>Courier New</option>
+                            <option value="Georgia, serif" ${fontFamily === 'Georgia, serif' ? 'selected' : ''}>Georgia</option>
+                            <option value="Verdana, sans-serif" ${fontFamily === 'Verdana, sans-serif' ? 'selected' : ''}>Verdana</option>
+                            <option value="'Trebuchet MS', sans-serif" ${fontFamily === "'Trebuchet MS', sans-serif" ? 'selected' : ''}>Trebuchet MS</option>
+                            <option value="Impact, sans-serif" ${fontFamily === 'Impact, sans-serif' ? 'selected' : ''}>Impact</option>
+                            <option value="'Comic Sans MS', cursive" ${fontFamily === "'Comic Sans MS', cursive" ? 'selected' : ''}>Comic Sans MS</option>
+                            <option value="Tahoma, sans-serif" ${fontFamily === 'Tahoma, sans-serif' ? 'selected' : ''}>Tahoma</option>
+                            <option value="'Segoe UI', sans-serif" ${fontFamily === "'Segoe UI', sans-serif" ? 'selected' : ''}>Segoe UI</option>
+                            <option value="'Roboto', sans-serif" ${fontFamily === "'Roboto', sans-serif" ? 'selected' : ''}>Roboto</option>
+                            <option value="'Open Sans', sans-serif" ${fontFamily === "'Open Sans', sans-serif" ? 'selected' : ''}>Open Sans</option>
+                            <option value="'Lato', sans-serif" ${fontFamily === "'Lato', sans-serif" ? 'selected' : ''}>Lato</option>
+                            <option value="'Montserrat', sans-serif" ${fontFamily === "'Montserrat', sans-serif" ? 'selected' : ''}>Montserrat</option>
+                            <option value="'Playfair Display', serif" ${fontFamily === "'Playfair Display', serif" ? 'selected' : ''}>Playfair Display</option>
+                            <option value="'Oswald', sans-serif" ${fontFamily === "'Oswald', sans-serif" ? 'selected' : ''}>Oswald</option>
+                            <option value="'Raleway', sans-serif" ${fontFamily === "'Raleway', sans-serif" ? 'selected' : ''}>Raleway</option>
+                            <option value="'Poppins', sans-serif" ${fontFamily === "'Poppins', sans-serif" ? 'selected' : ''}>Poppins</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Выравнивание</label>
                         <select id="field-align" class="form-input">
                             <option value="left" ${align === 'left' ? 'selected' : ''}>Слева</option>
@@ -606,30 +664,40 @@ function openEditModal(blockId, blockType) {
                 const url = blockData.url || '';
                 const alt = blockData.alt || 'Изображение';
                 const fit = blockData.fit || 'contain';
+                // Приоритет: загруженное изображение > URL из данных
+                const currentImageUrl = data.block?.image_url || url || '';
 
                 html = `
                 <h3 style="color: #7c3aed; margin-bottom: 1.5rem;">🖼️ Редактировать изображение</h3>
                 <form id="edit-form" enctype="multipart/form-data">
+                    ${currentImageUrl ? `
                     <div class="form-group">
-                        <label class="form-label">Загрузить файл</label>
+                        <label class="form-label">Текущее изображение</label>
+                        <div style="text-align: center; margin: 1rem 0;">
+                            <img src="${currentImageUrl}" alt="Текущее изображение" style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="form-group">
+                        <label class="form-label">Загрузить новый файл</label>
                         <input type="file" id="field-image" class="form-input" accept="image/*">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Или URL изображения</label>
-                        <input type="text" id="field-url" class="form-input" value="${url}">
+                        <label class="form-label">Или введите URL изображения</label>
+                        <input type="text" id="field-url" class="form-input" placeholder="https://example.com/image.jpg" value="${url}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Альтернативный текст</label>
-                        <input type="text" id="field-alt" class="form-input" value="${alt}">
+                        <label class="form-label">Альтернативный текст (alt)</label>
+                        <input type="text" id="field-alt" class="form-input" placeholder="Описание изображения" value="${alt}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Режим заполнения (object-fit)</label>
                         <select id="field-fit" class="form-input">
-                            <option value="contain" ${fit === 'contain' ? 'selected' : ''}>contain</option>
-                            <option value="cover" ${fit === 'cover' ? 'selected' : ''}>cover</option>
-                            <option value="fill" ${fit === 'fill' ? 'selected' : ''}>fill</option>
-                            <option value="none" ${fit === 'none' ? 'selected' : ''}>none</option>
-                            <option value="scale-down" ${fit === 'scale-down' ? 'selected' : ''}>scale-down</option>
+                            <option value="contain" ${fit === 'contain' ? 'selected' : ''}>contain - сохраняет пропорции, помещается целиком</option>
+                            <option value="cover" ${fit === 'cover' ? 'selected' : ''}>cover - заполняет контейнер, может обрезаться</option>
+                            <option value="fill" ${fit === 'fill' ? 'selected' : ''}>fill - растягивается под размер контейнера</option>
+                            <option value="none" ${fit === 'none' ? 'selected' : ''}>none - оригинальный размер</option>
+                            <option value="scale-down" ${fit === 'scale-down' ? 'selected' : ''}>scale-down - как contain или none, что меньше</option>
                         </select>
                     </div>
                 </form>
@@ -722,12 +790,23 @@ async function saveEditedBlock(blockId, blockType) {
         newData.content = document.getElementById('field-content')?.value || '';
         newData.size = document.getElementById('field-size')?.value || '16px';
         newData.align = document.getElementById('field-align')?.value || 'left';
+        const fontFamily = document.getElementById('field-font-family')?.value || '';
+        if (fontFamily) {
+            newData.font_family = fontFamily;
+        }
     } else if (blockType === 'heading') {
         newData.content = document.getElementById('field-content')?.value || '';
         newData.level = document.getElementById('field-level')?.value || 'h1';
         newData.align = document.getElementById('field-align')?.value || 'left';
+        const fontFamily = document.getElementById('field-font-family')?.value || '';
+        if (fontFamily) {
+            newData.font_family = fontFamily;
+        }
     } else if (blockType === 'image') {
         const fileInput = document.getElementById('field-image');
+        const urlInput = document.getElementById('field-url');
+        
+        // Если загружен файл, загружаем его
         if (fileInput && fileInput.files.length > 0) {
             const formData = new FormData();
             formData.append('image', fileInput.files[0]);
@@ -741,15 +820,22 @@ async function saveEditedBlock(blockId, blockType) {
 
                 const result = await response.json();
                 if (result.success) {
-                    newData.url = result.image_url;
+                    // При загрузке файла очищаем URL из данных, т.к. приоритет у загруженного файла
+                    newData.url = '';
+                } else {
+                    alert('Ошибка загрузки изображения: ' + (result.error || 'Неизвестная ошибка'));
+                    return;
                 }
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
+                alert('Ошибка загрузки изображения: ' + error.message);
                 return;
             }
-        } else {
-            newData.url = document.getElementById('field-url')?.value || '';
+        } else if (urlInput && urlInput.value.trim()) {
+            // Если указан URL, сохраняем его и очищаем загруженный файл (если нужно)
+            newData.url = urlInput.value.trim();
         }
+        
         newData.alt = document.getElementById('field-alt')?.value || 'Изображение';
         // Сохраняем режим object-fit если выбран
         const fitField = document.getElementById('field-fit');
@@ -795,21 +881,6 @@ async function updateBlockData(blockId, newData, reload = true) {
     }
 }
 
-// === ПРЕДПРОСМОТР ===
-function openPreview() {
-    const modal = document.getElementById('preview-modal');
-    if (modal) {
-        modal.classList.add('active');
-    }
-}
-
-function closePreview() {
-    const modal = document.getElementById('preview-modal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
-}
-
 // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
 function adjustInnerForMedia(blockItem) {
     // Подгоняем внутренние img/video/iframe так, чтобы они заполняли контейнер при свободном ресайзе
@@ -818,25 +889,19 @@ function adjustInnerForMedia(blockItem) {
     // Ищем изображение внутри блока
     const img = blockItem.querySelector('img');
     if (img) {
-        // Стремимся, чтобы изображение всегда оставалось в пределах контейнера
+        // Получаем режим заполнения из dataset или используем по умолчанию
         const fit = blockItem.dataset.fit || 'contain';
-        if (blockItem.dataset.proportional === 'true') {
-            // Сохраняем пропорции — масштабируем, не искажая
-            img.style.width = 'auto';
-            img.style.height = 'auto';
-            img.style.maxWidth = '100%';
-            img.style.maxHeight = '100%';
-            img.style.objectFit = fit;
-            img.style.display = 'block';
-            img.style.margin = '0 auto';
-        } else {
-            // Растягиваем под контейнер (может обрезаться в зависимости от object-fit)
-            img.style.width = '100%';
-            img.style.height = '100%';
-            img.style.objectFit = fit;
-            img.style.display = 'block';
-            img.style.margin = '0';
-        }
+        
+        // Всегда заполняем контейнер, object-fit управляет отображением
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = fit;
+        img.style.display = 'block';
+        img.style.margin = '0';
+        img.style.padding = '0';
+        
+        // Убираем любые inline стили, которые могут конфликтовать
+        // (они могли быть установлены при рендеринге)
     }
 
     // Видео или iframe

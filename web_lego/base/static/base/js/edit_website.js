@@ -1242,20 +1242,6 @@ async function updateBlockData(blockId, newData, reload = true) {
     }
 }
 
-// Предпросмотр
-function openPreview() {
-    const modal = document.getElementById('preview-modal');
-    if (modal) {
-        modal.classList.add('active');
-    }
-}
-
-function closePreview() {
-    const modal = document.getElementById('preview-modal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
-}
 
 // Вспомогательная функция для получения CSRF токена
 function getCookie(name) {

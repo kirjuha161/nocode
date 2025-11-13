@@ -128,14 +128,15 @@ body {
 .block-item {
     position: absolute;
     border: 2px solid transparent;
-    border-radius: 8px;
-    padding: 1rem;
+    border-radius: 0;
+    padding: 0;
     transition: all 0.2s ease;
     cursor: move;
     min-width: 150px;
     min-height: 100px;
     background: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .block-item:hover {
@@ -168,6 +169,15 @@ body {
     height: 100%;
     position: relative;
     overflow: hidden;
+}
+
+/* Изображения в блоках должны заполнять контейнер */
+.block-content img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: 0;
 }
 
 /* Badge that shows current size while resizing */
@@ -284,6 +294,17 @@ body {
     right: -10px;
     display: none;
     gap: 0.5rem;
+    z-index: 1000;
+}
+
+/* Кнопки всегда видны для блоков изображений */
+.block-item[data-block-type="image"] .block-controls {
+    display: flex;
+}
+
+/* Кнопки видны при наведении на любой блок */
+.block-item:hover .block-controls {
+    display: flex;
 }
 
 .block-item.selected .block-controls {
@@ -432,70 +453,6 @@ body {
     border-color: #8b5cf6;
     background: #faf5ff;
     color: #7c3aed;
-}
-
-/* Предпросмотр */
-.preview-mode {
-    position: fixed;
-    top: 70px;
-    right: 20px;
-    z-index: 999;
-}
-
-.preview-btn {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    transition: all 0.3s ease;
-}
-
-.preview-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-}
-
-.preview-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 2000;
-    overflow: auto;
-}
-
-.preview-modal.active {
-    display: block;
-}
-
-.preview-content {
-    background: white;
-    max-width: 1200px;
-    margin: 2rem auto;
-    border-radius: 10px;
-    padding: 2rem;
-    position: relative;
-}
-
-.preview-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: #ef4444;
-    color: white;
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.5rem;
 }
 
 /* Модальное окно для редактирования блока */
@@ -1018,15 +975,6 @@ body {
         font-size: 0.8rem;
     }
 
-    .preview-content {
-        margin: 1rem;
-        padding: 1rem;
-    }
-
-    .preview-content iframe {
-        height: 70vh;
-    }
-
     .edit-modal-content {
         width: 95%;
         padding: 1.5rem;
@@ -1070,15 +1018,6 @@ body {
         width: 28px;
         height: 28px;
         font-size: 0.75rem;
-    }
-
-    .preview-content {
-        margin: 0.5rem;
-        padding: 0.75rem;
-    }
-
-    .preview-content iframe {
-        height: 60vh;
     }
 
     .edit-modal-content {
