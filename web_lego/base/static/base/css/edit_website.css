@@ -122,25 +122,31 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 2rem;
+    position: relative;
 }
 
 .block-item {
-    position: relative;
-    margin-bottom: 1rem;
-    border: 2px dashed transparent;
+    position: absolute;
+    border: 2px solid transparent;
     border-radius: 8px;
     padding: 1rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     cursor: move;
+    min-width: 150px;
+    min-height: 100px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .block-item:hover {
     border-color: #8b5cf6;
     background: #faf5ff;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 
 .block-item.dragging {
-    opacity: 0.5;
+    opacity: 0.6;
+    z-index: 900;
 }
 
 .block-item.drag-over {
@@ -151,23 +157,44 @@ body {
 .block-item.selected {
     border-color: #8b5cf6;
     background: #faf5ff;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3), 0 4px 12px rgba(139, 92, 246, 0.2);
+    z-index: 800;
+    overflow: hidden;
 }
 
-.block-item.selected[data-block-type="image"],
-.block-item.selected[data-block-type="slider"] {
-    overflow: visible;
-}
-
+/* ensure block content doesn't overflow the block frame */
 .block-content {
-    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
-.block-content .editable {
-    pointer-events: auto;
+/* Badge that shows current size while resizing */
+.size-badge {
+    position: absolute;
+    top: -32px;
+    right: 0px;
+    background: rgba(15, 23, 42, 0.9);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    z-index: 1200;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-/* Ручки для изменения размера изображения в редакторе */
+/* Proportional toggle small style inside controls */
+.proportional-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(14, 165, 233, 0.06);
+}
+
 .block-resize-handle {
     position: absolute;
     background: #8b5cf6;
@@ -176,20 +203,27 @@ body {
     width: 14px;
     height: 14px;
     cursor: nwse-resize;
-    z-index: 100;
+    z-index: 1000;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     display: none;
     transition: all 0.2s ease;
+    pointer-events: auto;
 }
 
-.block-item.selected[data-block-type="image"] .block-resize-handle,
-.block-item.selected[data-block-type="slider"] .block-resize-handle {
+.block-item.selected .block-resize-handle {
     display: block;
 }
 
 .block-resize-handle:hover {
     background: #7c3aed;
-    transform: scale(1.3);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.6);
+    filter: brightness(1.1);
+}
+
+.block-resize-handle.resizing {
+    background: #7c3aed;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+    filter: brightness(1.2);
 }
 
 .block-resize-handle.se {
@@ -219,43 +253,29 @@ body {
 .block-resize-handle.e {
     top: 50%;
     right: -7px;
-    transform: translateY(-50%);
+    margin-top: -7px;
     cursor: ew-resize;
 }
 
 .block-resize-handle.w {
     top: 50%;
     left: -7px;
-    transform: translateY(-50%);
+    margin-top: -7px;
     cursor: ew-resize;
 }
 
 .block-resize-handle.n {
     top: -7px;
     left: 50%;
-    transform: translateX(-50%);
+    margin-left: -7px;
     cursor: ns-resize;
 }
 
 .block-resize-handle.s {
     bottom: -7px;
     left: 50%;
-    transform: translateX(-50%);
+    margin-left: -7px;
     cursor: ns-resize;
-}
-
-.block-item.selected[data-block-type="image"] .block-resize-handle.e,
-.block-item.selected[data-block-type="image"] .block-resize-handle.w,
-.block-item.selected[data-block-type="slider"] .block-resize-handle.e,
-.block-item.selected[data-block-type="slider"] .block-resize-handle.w {
-    transform: translateY(-50%);
-}
-
-.block-item.selected[data-block-type="image"] .block-resize-handle.n,
-.block-item.selected[data-block-type="image"] .block-resize-handle.s,
-.block-item.selected[data-block-type="slider"] .block-resize-handle.n,
-.block-item.selected[data-block-type="slider"] .block-resize-handle.s {
-    transform: translateX(-50%);
 }
 
 .block-controls {
@@ -869,6 +889,7 @@ body {
 }
 
 @media (max-width: 1200px) {
+
     .blocks-panel,
     .settings-panel {
         width: 250px;
@@ -899,7 +920,7 @@ body {
         flex-direction: column;
         height: auto;
     }
-    
+
     .blocks-panel,
     .settings-panel {
         width: 100%;
@@ -1064,4 +1085,3 @@ body {
         padding: 1rem;
     }
 }
-
