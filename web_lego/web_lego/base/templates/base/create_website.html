@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать сайт - Web Lego</title>
+    <link rel="stylesheet" href="{% static 'base/css/create_website.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="{% url 'dashboard' %}" class="logo">Web Lego</a>
+            <div class="nav-links">
+                <a href="{% url 'dashboard' %}" class="nav-link">← Назад в кабинет</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="create-card">
+                <h1 class="page-title">Создать новый сайт</h1>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="title" class="form-label">Название сайта</label>
+                        <input type="text" id="title" name="title" class="form-input" 
+                               placeholder="Введите название вашего сайта" required
+                               value="{{ request.POST.title }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">Описание (необязательно)</label>
+                        <textarea id="description" name="description" class="form-input" 
+                                  placeholder="Краткое описание вашего сайта"
+                                  rows="3">{{ request.POST.description }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="font_family" class="form-label">Шрифт</label>
+                        <select id="font_family" name="font_family" class="form-input">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                            <option value="Impact, sans-serif">Impact</option>
+                            <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                            <option value="'Lucida Console', monospace">Lucida Console</option>
+                            <option value="Tahoma, sans-serif">Tahoma</option>
+                            <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                            <option value="'Roboto', sans-serif">Roboto</option>
+                            <option value="'Open Sans', sans-serif">Open Sans</option>
+                            <option value="'Lato', sans-serif">Lato</option>
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Playfair Display', serif">Playfair Display</option>
+                            <option value="'Oswald', sans-serif">Oswald</option>
+                            <option value="'Raleway', sans-serif">Raleway</option>
+                            <option value="'Poppins', sans-serif">Poppins</option>
+                        </select>
+                        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">
+                            💡 Google Fonts будут автоматически подключены при выборе
+                        </p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn">
+                            🚀 Создать сайт
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            Отмена
+                        </a>
+                    </div>
+                </form>
+
+                <div class="tips">
+                    <h3>💡 Советы для начала:</h3>
+                    <ul>
+                        <li>Выберите понятное название для вашего сайта</li>
+                        <li>После создания вы сможете настроить дизайн и контент</li>
+                        <li>Используйте редактор для добавления текста, изображений и стилей</li>
+                        <li>Ваш сайт будет доступен по уникальной ссылке</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

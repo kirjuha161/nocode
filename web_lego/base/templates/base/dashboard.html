@@ -1,0 +1,83 @@
+{% load static %}
+<!--ЛИЧНЫЙ КАБИНЕТ-->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Web Lego</title>
+    <link rel="stylesheet" href="{% static 'base/css/dashboard.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="logo">Web Lego</a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Главная</a>
+                    <span style="color: white;">Добро пожаловать, {{ user.username }}!</span>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="background: transparent; border: 1px solid white;">Выйти</button>
+                    </form>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard">
+        <div class="container">
+            <div class="websites-section">
+                <h2 class="section-title">Мои сайты</h2>
+                
+                {% if websites %}
+                    <div class="websites-grid">
+                        {% for website in websites %}
+                            <div class="website-card">
+                                <div class="website-title">{{ website.title }}</div>
+                                <div class="website-meta">
+                                    <small>Создан: {{ website.created_at|date:"d.m.Y" }}</small>
+                                </div>
+                                <div class="website-actions">
+                                    <a href="{% url 'edit_website' website.id %}" class="btn btn-small btn-edit">Редактировать</a>
+                                    <a href="{% url 'view_website' website.id %}" target="_blank" class="btn btn-small btn-view">Просмотреть</a>
+                                    <form method="post" action="{% url 'delete_website' website.id %}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить этот сайт?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-small" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <a href="{% url 'create_website' %}" class="btn">Создать сайт</a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>У вас пока нет созданных сайтов.</p>
+                        <a href="{% url 'create_website' %}" class="btn">Создать первый сайт</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">Web Lego</div>
+                <div class="footer-links">
+                    <a href="/" class="footer-link">Главная</a>
+                    <a href="/register/" class="footer-link">Регистрация</a>
+                    <a href="/admin/" class="footer-link">Войти</a>
+                </div>
+            </div>
+            <p style="margin-top: 2rem; color: #9ca3af;">© 2025 Don crayfish. Web lego-конструктор одностраничных сайтов.</p>
+        </div>
+    </footer>
+</body>
+</html>

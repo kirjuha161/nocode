@@ -1,0 +1,241 @@
+{% load static %}
+{% load block_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Редактировать {{ website.title }} - Web Lego</title>
+    <link rel="stylesheet" href="{% static 'base/css/edit_website.css' %}">
+</head>
+
+<body data-website-id="{% if website.id %}{{ website.id }}{% else %}null{% endif %}">
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="{% url 'dashboard' %}" class="logo">Web Lego</a>
+            <div class="nav-links">
+                <a href="{% url 'view_website' website.id %}" target="_blank" class="nav-link">🌐 Открыть сайт</a>
+                <a href="{% url 'dashboard' %}" class="nav-link">← Назад</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Editor Container -->
+    <div class="editor-container">
+        <!-- Панель блоков -->
+        <div class="blocks-panel">
+            <h3>📦 Блоки</h3>
+            <div class="block-types">
+                <div class="block-type-btn" draggable="true" data-type="heading">
+                    📝 Заголовок
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="text">
+                    📄 Текст
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="image">
+                    🖼️ Изображение
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="video">
+                    🎥 Видео
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="button">
+                    🔘 Кнопка
+                </div>
+                <div class="block-type-btn" draggable="true" data-type="slider">
+                    🎠 Слайдер
+                </div>
+            </div>
+        </div>
+
+        <!-- Область редактора -->
+        <div class="editor-area">
+            <div class="editor-canvas" id="editor-canvas">
+                {% if blocks %}
+                {% for block in blocks %}
+                {% with data=block.get_data %}
+                <div class="block-item" data-block-id="{{ block.id }}" data-block-type="{{ block.block_type }}"
+                    draggable="true"
+                    style="position: absolute; {% if data.position_x is not None %}left:{{ data.position_x }}px;{% endif %} {% if data.position_y is not None %}top:{{ data.position_y }}px;{% endif %}">
+                    <div class="block-controls">
+                        <button type="button" class="block-btn" onclick="editBlock('{{ block.id }}')">✏️</button>
+                        <button type="button" class="block-btn delete"
+                            onclick="deleteBlock('{{ block.id }}')">🗑️</button>
+                        <!-- proportional toggle removed to restore previous stable template -->
+                    </div>
+                    <div class="block-resize-handle se" data-handle="se" title="Изменить размер"></div>
+                    <div class="block-resize-handle sw" data-handle="sw" title="Изменить размер"></div>
+                    <div class="block-resize-handle ne" data-handle="ne" title="Изменить размер"></div>
+                    <div class="block-resize-handle nw" data-handle="nw" title="Изменить размер"></div>
+                    <div class="block-resize-handle e" data-handle="e" title="Изменить размер"></div>
+                    <div class="block-resize-handle w" data-handle="w" title="Изменить размер"></div>
+                    <div class="block-resize-handle n" data-handle="n" title="Изменить размер"></div>
+                    <div class="block-resize-handle s" data-handle="s" title="Изменить размер"></div>
+                    <div class="block-content">
+                        {{ block|render_block }}
+                    </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>Перетащите блоки сюда, чтобы начать создавать лендинг</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Панель настроек -->
+        <div class="settings-panel">
+            <h3>⚙️ Настройки</h3>
+            <form id="settings-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">Название сайта</label>
+                    <input type="text" name="title" class="form-input" value="{{ website.title }}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет фона</label>
+                    <div class="color-input">
+                        <input type="color" name="background_color"
+                            value="{{ website.background_color|default:'#ffffff' }}">
+                        <input type="text" class="form-input" value="{{ website.background_color|default:'#ffffff' }}"
+                            readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет текста</label>
+                    <div class="color-input">
+                        <input type="color" name="text_color" value="{{ website.text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.text_color|default:'#000000' }}"
+                            readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Шрифт</label>
+                    <select name="font_family" class="form-input">
+                        <option value="Arial, sans-serif" {% if website.font_family == "Arial, sans-serif" %}selected{% endif %}>Arial</option>
+                        <option value="'Times New Roman', serif" {% if website.font_family == "'Times New Roman', serif" %}selected{% endif %}>Times New Roman</option>
+                        <option value="'Courier New', monospace" {% if website.font_family == "'Courier New', monospace" %}selected{% endif %}>Courier New</option>
+                        <option value="Georgia, serif" {% if website.font_family == "Georgia, serif" %}selected{% endif %}>Georgia</option>
+                        <option value="Verdana, sans-serif" {% if website.font_family == "Verdana, sans-serif" %}selected{% endif %}>Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif" {% if website.font_family == "'Trebuchet MS', sans-serif" %}selected{% endif %}>Trebuchet MS</option>
+                        <option value="Impact, sans-serif" {% if website.font_family == "Impact, sans-serif" %}selected{% endif %}>Impact</option>
+                        <option value="'Comic Sans MS', cursive" {% if website.font_family == "'Comic Sans MS', cursive" %}selected{% endif %}>Comic Sans MS</option>
+                        <option value="'Lucida Console', monospace" {% if website.font_family == "'Lucida Console', monospace" %}selected{% endif %}>Lucida Console</option>
+                        <option value="Tahoma, sans-serif" {% if website.font_family == "Tahoma, sans-serif" %}selected{% endif %}>Tahoma</option>
+                        <option value="'Segoe UI', sans-serif" {% if website.font_family == "'Segoe UI', sans-serif" %}selected{% endif %}>Segoe UI</option>
+                        <option value="'Roboto', sans-serif" {% if website.font_family == "'Roboto', sans-serif" %}selected{% endif %}>Roboto</option>
+                        <option value="'Open Sans', sans-serif" {% if website.font_family == "'Open Sans', sans-serif" %}selected{% endif %}>Open Sans</option>
+                        <option value="'Lato', sans-serif" {% if website.font_family == "'Lato', sans-serif" %}selected{% endif %}>Lato</option>
+                        <option value="'Montserrat', sans-serif" {% if website.font_family == "'Montserrat', sans-serif" %}selected{% endif %}>Montserrat</option>
+                        <option value="'Playfair Display', serif" {% if website.font_family == "'Playfair Display', serif" %}selected{% endif %}>Playfair Display</option>
+                        <option value="'Oswald', sans-serif" {% if website.font_family == "'Oswald', sans-serif" %}selected{% endif %}>Oswald</option>
+                        <option value="'Raleway', sans-serif" {% if website.font_family == "'Raleway', sans-serif" %}selected{% endif %}>Raleway</option>
+                        <option value="'Poppins', sans-serif" {% if website.font_family == "'Poppins', sans-serif" %}selected{% endif %}>Poppins</option>
+                    </select>
+                </div>
+
+                <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #7c3aed;">Header</h4>
+
+                <div class="form-group">
+                    <label class="form-label">Название компании</label>
+                    <input type="text" name="header_company_name" class="form-input"
+                        value="{{ website.header_company_name }}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Логотип</label>
+                    <input type="file" name="header_logo" class="form-input" accept="image/*">
+                    {% if website.header_logo %}
+                    <img src="{{ website.header_logo.url }}" alt="Logo" style="max-width: 100px; margin-top: 0.5rem;">
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет фона Header</label>
+                    <div class="color-input">
+                        <input type="color" name="header_background_color"
+                            value="{{ website.header_background_color|default:'#ffffff' }}">
+                        <input type="text" class="form-input"
+                            value="{{ website.header_background_color|default:'#ffffff' }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет текста Header</label>
+                    <div class="color-input">
+                        <input type="color" name="header_text_color"
+                            value="{{ website.header_text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.header_text_color|default:'#000000' }}"
+                            readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="header_show" {% if website.header_show %}checked{% endif %}>
+                        Показывать Header
+                    </label>
+                </div>
+
+                <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: #7c3aed;">Footer</h4>
+
+                <div class="form-group">
+                    <label class="form-label">Содержимое Footer</label>
+                    <textarea name="footer_content" class="form-input" rows="3">{{ website.footer_content }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет фона Footer</label>
+                    <div class="color-input">
+                        <input type="color" name="footer_background_color"
+                            value="{{ website.footer_background_color|default:'#f3f4f6' }}">
+                        <input type="text" class="form-input"
+                            value="{{ website.footer_background_color|default:'#f3f4f6' }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Цвет текста Footer</label>
+                    <div class="color-input">
+                        <input type="color" name="footer_text_color"
+                            value="{{ website.footer_text_color|default:'#000000' }}">
+                        <input type="text" class="form-input" value="{{ website.footer_text_color|default:'#000000' }}"
+                            readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="footer_show" {% if website.footer_show %}checked{% endif %}>
+                        Показывать Footer
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">💾 Сохранить настройки</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования блока -->
+    <div class="edit-modal" id="edit-modal">
+        <div class="edit-modal-content">
+            <button class="edit-modal-close" onclick="closeEditModal()">×</button>
+            <div id="edit-modal-body">
+                <!-- Содержимое будет добавлено динамически -->
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'base/js/edit_website_v3.js' %}"></script>
+</body>
+
+</html>
