@@ -20,7 +20,7 @@ Frontend: HTML, CSS, JavaScript
 Контейнеризация: Docker, Docker Compose
 
 Быстрый старт
-Запуск с Docker (Рекомендуется)
+Запуск с Docker 
 bash
 # Клонирование репоэитория
 git clone <repository-url>
@@ -57,19 +57,6 @@ python manage.py runserver
 Использование
 Регистрация - Создайте аккаунт на главной странице
 
-Создание сайта - Перейдите в Dashboard → "Создать сайт"
-
-Редактирование
-
-Перетаскивание блоков из панели слева на canvas
-
-Кликните на блок для редактирования содержимого
-
-Изменение размера перетаскиванием углов блока
-
-Настройка параметров в правой панели
-
-Просмотр - Нажмите "Открыть сайт" для просмотра результата
 
 Команды Docker
 Команда	Описание
@@ -79,16 +66,7 @@ docker-compose down	Остановка проекта
 docker-compose up --build	Пересборка и запуск
 docker-compose exec web python manage.py <command>	Выполнение команд Django
 docker-compose logs -f web	Просмотр логов
-Настройка
-Переменные окружения
-Для production настройте следующие переменные:
 
-text
-SECRET_KEY=your-secret-key-here
-DEBUG=False
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-DATABASE_URL=postgres://user:password@host:port/database
-Использование PostgreSQL
 Проект уже настроен для работы с PostgreSQL в Docker Compose. База данных автоматически создается при первом запуске.
 
 Разработка
