@@ -1,0 +1,148 @@
+{% load static %}
+{% load block_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ website.title }}</title>
+    <link rel="stylesheet" href="{% static 'base/css/view_website.css' %}">
+    {% comment %} Подключение Google Fonts для выбранных шрифтов {% endcomment %}
+    {% if "Roboto" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    {% elif "Open Sans" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    {% elif "Lato" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    {% elif "Montserrat" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% elif "Playfair Display" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% elif "Oswald" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% elif "Raleway" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% elif "Poppins" in website.font_family %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% endif %}
+    {% comment %} Подключение Google Fonts для шрифтов в блоках {% endcomment %}
+    {% for block in blocks %}
+        {% with data=block.get_data %}
+            {% if "Roboto" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+            {% elif "Open Sans" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+            {% elif "Lato" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+            {% elif "Montserrat" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            {% elif "Playfair Display" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+            {% elif "Oswald" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            {% elif "Raleway" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            {% elif "Poppins" in data.font_family|default:"" %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            {% endif %}
+        {% endwith %}
+    {% endfor %}
+    <style>
+        :root {
+            --font-family: {{ website.font_family|default:"Arial, sans-serif" }};
+            --background-color: {{ website.background_color|default:"#ffffff" }};
+            --text-color: {{ website.text_color|default:"#000000" }};
+            --header-background-color: {{ website.header_background_color|default:"#ffffff" }};
+            --header-text-color: {{ website.header_text_color|default:"#000000" }};
+            --footer-background-color: {{ website.footer_background_color|default:"#f3f4f6" }};
+            --footer-text-color: {{ website.footer_text_color|default:"#000000" }};
+        }
+        body {
+            font-family: var(--font-family);
+        }
+        
+        /* Шрифт блоков применяется через inline стили, которые имеют приоритет */
+    </style>
+</head>
+
+<body>
+
+    {% if website.header_show %}
+    <header class="header">
+        <div class="header-content">
+            {% if website.header_logo %}
+            <img src="{{ website.header_logo.url }}" alt="Logo" class="header-logo">
+            {% endif %}
+            {% if website.header_company_name %}
+            <div class="header-company-name">{{ website.header_company_name }}</div>
+            {% endif %}
+        </div>
+    </header>
+    {% endif %}
+
+    <main class="main-content">
+        <div class="site-canvas">
+            {% for block in blocks %}
+            {% with data=block.get_data %}
+            {# Собираем inline-стили на основе сохранённых данных блока (позиция и размеры) #}
+            {# left/top/width/height ожидаются в пикселях (числа). Если нет — стиль не применяется. #}
+            <div class="block-item"
+                data-original-width="{% if data.width is not None and data.width|floatformat:'0' %}{{ data.width }}px{% endif %}"
+                data-original-height="{% if data.height is not None and data.height|floatformat:'0' %}{{ data.height }}px{% endif %}"
+                style="position: absolute; {% if data.position_x is not None %}left:{{ data.position_x }}px;{% endif %} {% if data.position_y is not None %}top:{{ data.position_y }}px;{% endif %} {% if data.width is not None %}width:{{ data.width }}px;{% endif %} {% if data.height is not None %}height:{{ data.height }}px;{% endif %}">
+                {{ block|render_block }}
+            </div>
+            {% endwith %}
+            {% empty %}
+            <div style="text-align: center; padding: 3rem; color: #6b7280;">
+                <p>На сайте пока нет контента.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    {% if website.footer_show %}
+    <footer class="footer">
+        <div class="footer-content">
+            {{ website.footer_content|safe }}
+        </div>
+    </footer>
+    {% endif %}
+
+    <script src="{% static 'base/js/view_website.js' %}"></script>
+</body>
+
+</html>
