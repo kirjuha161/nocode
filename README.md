@@ -1,20 +1,22 @@
-Web Lego - Конструктор одностраничных сайтов
+markdown
+# Web Lego - Конструктор одностраничных сайтов
+
 Конструктор для создания одностраничных сайтов без программирования
 
 
-Технологии
-Backend: Django 4.2+
+## Технологии
 
-Frontend: HTML, CSS, JavaScript
+- **Backend**: Django 4.2+
+- **Frontend**: HTML, CSS, JavaScript
+- **База данных**: SQLite (по умолчанию) / PostgreSQL (в Docker)
+- **Контейнеризация**: Docker, Docker Compose
 
-База данных: SQLite (по умолчанию) / PostgreSQL (в Docker)
+## Быстрый старт
 
-Контейнеризация: Docker, Docker Compose
+### Запуск с Docker 
 
-Быстрый старт
-Запуск с Docker 
-bash
-# Клонирование репоэитория
+```bash
+# Клонирование репозитория
 git clone <repository-url>
 cd nocode/web_lego
 
@@ -47,8 +49,6 @@ python manage.py createsuperuser
 # Запуск сервера
 python manage.py runserver
 
-
-
 Команды Docker
 Команда	Описание
 docker-compose up	Запуск проекта
@@ -58,25 +58,21 @@ docker-compose up --build	Пересборка и запуск
 docker-compose exec web python manage.py <command>	Выполнение команд Django
 docker-compose logs -f web	Просмотр логов
 
-Проект уже настроен для работы с PostgreSQL в Docker Compose. База данных автоматически создается при первом запуске.
-
 Разработка
 Рекомендации для разработчиков:
 
 Виртуальное окружение
-
 bash
 python -m venv venv
-source venv/bin/activate
+source venv/Scripts/activate
 Установка зависимостей
-
 bash
+pip install Django
+pip install Pillow
 pip install -r requirements.txt
 Миграции
-
 bash
 python manage.py migrate
-
-
+Сервер разработки
 bash
 python manage.py runserver
